@@ -173,50 +173,13 @@
                 if (data.getNumberOfRows() > 0) {
                     let t = data.getValue(0, 1);
                     let h = data.getValue(0, 2);
+                    // อัปเดตตัวเลขหน้าจอ
                     document.getElementById('t_val').innerHTML = (typeof t === 'number' ? t.toFixed(1) : t) + '<span class="unit">°C</span>';
                     document.getElementById('h_val').innerHTML = (typeof h === 'number' ? h.toFixed(1) : h) + '<span class="unit">%</span>';
                 }
 
                 const view = new google.visualization.DataView(data);
                 view.setRows(data.getSortedRows([{column: 0, asc: true}]));
-                
-                // --- 🛠️ ปรับแต่งกราฟให้ดูสะอาดตาและอ่านง่ายขึ้น ---
-                const options = {
-                    curveType: 'function',
-                    lineWidth: 3,                 // เพิ่มความหนาของเส้นกราฟให้เด่นชัด
-                    legend: { position: 'bottom', textStyle: { color: '#8b949e', fontSize: 12 } },
-                    colors: ['#ff9f43', '#00d2ff'], 
-                    backgroundColor: 'transparent',
-                    chartArea: { width: '90%', height: '75%', left: 50, right: 20 },
-                    
-                    hAxis: { 
-                        title: '',                // นำชื่อแกนออกเพื่อความสะอาด
-                        textStyle: { color: '#555', fontSize: 10 },
-                        gridlines: { color: 'transparent' }, // ❌ นำเส้น Grid แนวตั้งออกทั้งหมด
-                        baselineColor: '#30363d'
-                    },
-                    
-                    vAxis: { 
-                        title: '',                // นำชื่อแกนออก
-                        textStyle: { color: '#8b949e', fontSize: 11 },
-                        gridlines: { 
-                            color: '#21262d',     // เปลี่ยนสีเส้น Grid แนวนอนให้จางลงมาก
-                            count: 5              // ลดจำนวนเส้น Grid ให้เหลือเพียง 5 เส้นหลัก
-                        },
-                        minorGridlines: { color: 'transparent' }, // ❌ นำเส้นย่อยออกทั้งหมด
-                        baselineColor: '#30363d',
-                        viewWindow: { min: 0 } 
-                    },
-                    
-                    crosshair: { trigger: 'both', orientation: 'vertical', color: '#58a6ff' }, // เพิ่มเส้นนำสายตาเมื่อเอาเมาส์ไปชี้
-                    interpolateNulls: true,
-                    animation: { startup: true, duration: 800, easing: 'out' }
-                };
-
-                const chart = new google.visualization.LineChart(document.getElementById('line_chart'));
-                chart.draw(view, options);
-            });
-        }
                 
                 // ปรับสีสันกราฟให้เป็น Dark Mode ตามภาพอ้างอิง
                 const options = {
@@ -259,4 +222,3 @@
     </script>
 </body>
 </html>
-
