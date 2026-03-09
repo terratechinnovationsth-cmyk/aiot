@@ -1,80 +1,150 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TerraTech Dashboard</title>
+    <title>TerraTech Professional Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f0f4f7; text-align: center; }
-        header { background: linear-gradient(135deg, #1a2a6c, #b21f1f); color: white; padding: 20px; }
-        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; flex: 1; min-width: 250px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .value { font-size: 2.5rem; font-weight: bold; color: #2c3e50; }
-        .chart-card { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 1000px; margin: 20px auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        #line_chart { width: 100%; height: 400px; min-height: 400px; }
-        .btn-group button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; background: #1a2a6c; color: white; cursor: pointer; }
+        body { background-color: #0b0e11; color: #e4e6eb; font-family: 'Segoe UI', sans-serif; }
+        .tech-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .crop-img { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; border: 1px solid #30363d; }
+        .crop-label { font-size: 0.8rem; color: #8b949e; margin-top: 8px; text-transform: uppercase; }
+        .value-display { font-size: 2.2rem; font-weight: bold; color: #ffffff; }
+        #line_chart { width: 100%; height: 400px; background: transparent; }
+        /* ปรับแต่งปุ่มให้ดูเป็นมืออาชีพ */
+        .btn-outline-tech { color: #58a6ff; border-color: #30363d; }
+        .btn-outline-tech:hover, .btn-check:checked + .btn-outline-tech { background: #1f6feb; color: #fff; }
     </style>
 </head>
-<body>
-    <header><h1>TERRATECH INNOVATION</h1></header>
-    <div class="container">
-        <div class="card"><h3>Temperature</h3><div id="t_val" class="value">--°C</div></div>
-        <div class="card"><h3>Humidity</h3><div id="h_val" class="value">--%</div></div>
-    </div>
-    <div class="chart-card">
-        <div class="btn-group">
-            <button onclick="drawChart(1)">1 Day</button>
-            <button onclick="drawChart(7)">7 Days</button>
-            <button onclick="drawChart(30)">1 Month</button>
+<body class="p-3 p-md-5">
+
+    <div class="container-fluid max-width-lg">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-8">
+                <h1 class="h3 fw-bold m-0">TERRATECH INNOVATION Co.,Ltd.</h1>
+                <p class="text-secondary">Agricultural Environmental Monitoring System</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <h2 id="clock" class="h4 text-light">Friday 23:45</h2>
+            </div>
         </div>
-        <div id="line_chart">กำลังโหลดกราฟ...</div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-4 col-md-4">
+                <img src="https://images.unsplash.com/photo-1518635017498-87f514b751ba?auto=format&fit=crop&w=400&q=80" class="crop-img" alt="Strawberry">
+                <div class="crop-label text-center">Strawberry</div>
+            </div>
+            <div class="col-4 col-md-4">
+                <img src="https://images.unsplash.com/photo-1628114004944-77a3d24e132c?auto=format&fit=crop&w=400&q=80" class="crop-img" alt="Hemp">
+                <div class="crop-label text-center">Hemp</div>
+            </div>
+            <div class="col-4 col-md-4">
+                <img src="https://images.unsplash.com/photo-1588556041238-9e66598c199f?auto=format&fit=crop&w=400&q=80" class="crop-img" alt="Mushroom">
+                <div class="crop-label text-center">Mushroom</div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="tech-card">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary fw-bold">Temp</span>
+                        <span style="color: #ff9f43;">🌡️</span>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-6 text-center">
+                            <div id="temp_gauge" style="width: 140px; height: 140px; margin: auto;"></div>
+                        </div>
+                        <div class="col-6 text-center">
+                            <div id="temp_val" class="value-display">--.- °C</div>
+                            <div class="text-secondary small">Real-time Sensor</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="tech-card">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary fw-bold">Humidity</span>
+                        <span style="color: #00d2ff;">💧</span>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-6 text-center">
+                            <div id="hum_gauge" style="width: 140px; height: 140px; margin: auto;"></div>
+                        </div>
+                        <div class="col-6 text-center">
+                            <div id="hum_val" class="value-display">--.- %</div>
+                            <div class="text-secondary small">Real-time Sensor</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="tech-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="m-0 fw-bold">Historical Trend</h5>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-tech active" onclick="loadData(1)">1 Day</button>
+                            <button type="button" class="btn btn-sm btn-outline-tech" onclick="loadData(7)">7 Days</button>
+                            <button type="button" class="btn btn-sm btn-outline-tech" onclick="loadData(30)">1 Month</button>
+                        </div>
+                    </div>
+                    <div id="line_chart"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(() => drawChart(1));
+        google.charts.load('current', {'packages':['corechart', 'gauge']});
+        google.charts.setOnLoadCallback(() => loadData(1));
 
-        function drawChart(days) {
-            const sheetID = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
-            // ดึงข้อมูล 100 แถวแรกเพื่อความเร็วในการแสดงผล Real-time
-            const query = new google.visualization.Query(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tq=select A,B,C order by A desc limit ${days * 200}`);
+        function loadData(days) {
+            const sid = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
+            const url = `https://docs.google.com/spreadsheets/d/${sid}/gviz/tq?tq=select A,B,C order by A desc limit ${days * 200}`;
             
-            query.send(response => {
-                if (response.isError()) {
-                    document.getElementById('line_chart').innerHTML = "Error: " + response.getMessage();
-                    return;
-                }
-                const data = response.getDataTable();
+            fetch(url).then(r => r.text()).then(txt => {
+                const data = new google.visualization.DataTable(JSON.parse(txt.substring(txt.indexOf("{"), txt.lastIndexOf("}") + 1)));
                 
-                // อัปเดตตัวเลขล่าสุด (แถวที่ 0 คือล่าสุดเพราะเรา order by A desc)
-                if (data.getNumberOfRows() > 0) {
-                    let t = data.getValue(0, 1);
-                    let h = data.getValue(0, 2);
-                    document.getElementById('t_val').innerText = (typeof t === 'number' ? t.toFixed(1) : t) + "°C";
-                    document.getElementById('h_val').innerText = (typeof h === 'number' ? h.toFixed(1) : h) + "%";
-                }
+                // Update Values & Gauges
+                const t = data.getValue(0, 1);
+                const h = data.getValue(0, 2);
+                document.getElementById('temp_val').innerText = t.toFixed(1) + ' °C';
+                document.getElementById('hum_val').innerText = h.toFixed(1) + ' %';
 
-                // สร้าง View ใหม่และเรียงลำดับจากเก่าไปใหม่ (เพื่อให้กราฟวิ่งจากซ้ายไปขวา)
+                // Orange Gauge Config (คล้ายรูปอ้างอิง)
+                const gOpt = {
+                    min: 0, max: 100, yellowFrom: 0, yellowTo: 100,
+                    yellowColor: '#f39c12', minorTicks: 5, width: 250, height: 250
+                };
+                new google.visualization.Gauge(document.getElementById('temp_gauge')).draw(google.visualization.arrayToDataTable([['Label', 'Value'], ['T', t]]), gOpt);
+                new google.visualization.Gauge(document.getElementById('hum_gauge')).draw(google.visualization.arrayToDataTable([['Label', 'Value'], ['H', h]]), gOpt);
+
+                // Line Chart
                 const view = new google.visualization.DataView(data);
                 view.setRows(data.getSortedRows([{column: 0, asc: true}]));
-                
-                const options = {
-                    curveType: 'function',
-                    legend: { position: 'bottom' },
-                    colors: ['#e74c3c', '#3498db'],
-                    hAxis: { title: 'Timeline', gridlines: { count: 10 } },
-                    vAxis: { title: 'Value', gridlines: { color: '#eee' }, viewWindow: { min: 0 } },
-                    chartArea: { width: '85%', height: '70%' },
-                    interpolateNulls: true
-                };
-
-                const chart = new google.visualization.LineChart(document.getElementById('line_chart'));
-                chart.draw(view, options);
+                new google.visualization.LineChart(document.getElementById('line_chart')).draw(view, {
+                    backgroundColor: 'transparent', curveType: 'function',
+                    legend: { position: 'bottom', textStyle: { color: '#8b949e' } },
+                    colors: ['#ff9f43', '#00d2ff'],
+                    hAxis: { textStyle: { color: '#8b949e' }, gridlines: { color: '#30363d' } },
+                    vAxis: { textStyle: { color: '#8b949e' }, gridlines: { color: '#30363d' } },
+                    chartArea: { width: '90%', height: '70%' }
+                });
             });
         }
-        // รีเฟรชอัตโนมัติทุก 1 นาที
-        setInterval(() => drawChart(1), 60000);
+
+        setInterval(() => {
+            const now = new Date();
+            const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            document.getElementById('clock').innerText = `${days[now.getDay()]} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+        }, 1000);
+        setInterval(() => loadData(1), 30000);
     </script>
 </body>
 </html>
