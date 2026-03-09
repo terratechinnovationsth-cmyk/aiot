@@ -1,178 +1,80 @@
 <!DOCTYPE html>
-<html lang="th">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TerraTech Farm Monitor | Professional Edition</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>TerraTech Dashboard</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-        :root {
-            --bs-body-bg: #121418;
-            --bs-body-color: #e4e6eb;
-            --bs-card-bg: #1e2125;
-            --tech-blue: #3498db;
-            --tech-orange: #f39c12;
-            --tech-green: #2ecc71;
-            --bs-heading-color: #fff;
-        }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; }
-        .dashboard-container { max-width: 1400px; margin: 0 auto; padding: 30px 15px; }
-        .tech-card { background: var(--bs-card-bg); border: none; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .card-header { border-bottom: none; padding-bottom: 0; }
-        .gauge-container { width: 100%; height: 200px; }
-        .crop-image { max-width: 100%; height: auto; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .crop-label { font-size: 0.9rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-check:checked + .btn-outline-primary { background-color: var(--tech-green); border-color: var(--tech-green); }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f0f4f7; text-align: center; }
+        header { background: linear-gradient(135deg, #1a2a6c, #b21f1f); color: white; padding: 20px; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; flex: 1; min-width: 250px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .value { font-size: 2.5rem; font-weight: bold; color: #2c3e50; }
+        .chart-card { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 1000px; margin: 20px auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #line_chart { width: 100%; height: 400px; min-height: 400px; }
+        .btn-group button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; background: #1a2a6c; color: white; cursor: pointer; }
     </style>
 </head>
-<body class="bg-body">
-    <div class="dashboard-container">
-        <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-dark">
-            <div>
-                <h1 class="h2 text-heading">TERRATECH FARMING SYSTEM</h1>
-                <p class="text-muted mb-0">ระบบติดตามสภาพแวดล้อมระดับมืออาชีพ</p>
-            </div>
-            <div id="dateTime" class="h5 text-muted text-end"></div>
+<body>
+    <header><h1>TERRATECH INNOVATION</h1></header>
+    <div class="container">
+        <div class="card"><h3>Temperature</h3><div id="t_val" class="value">--°C</div></div>
+        <div class="card"><h3>Humidity</h3><div id="h_val" class="value">--%</div></div>
+    </div>
+    <div class="chart-card">
+        <div class="btn-group">
+            <button onclick="drawChart(1)">1 Day</button>
+            <button onclick="drawChart(7)">7 Days</button>
+            <button onclick="drawChart(30)">1 Month</button>
         </div>
-
-        <div class="row g-4 mb-5">
-            <div class="col-12 col-md-4 text-center">
-                <img src="https://images.unsplash.com/photo-1549416878-b9ca95e26903?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=600&ixid=MnwxfDB8MXxyYW5kb218MHx8c3RyYXdiZXJyeSxwbGFudHx8fHx8fDE2NzUwMjg4NzU&ixlib=rb-4.0.3&q=80&w=800" alt="สตรอว์เบอร์รี่" class="crop-image mb-2">
-                <p class="crop-label text-muted">Strawberry</p>
-            </div>
-            <div class="col-12 col-md-4 text-center">
-                <img src="https://images.unsplash.com/photo-1628114004944-77a3d24e132c?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=600&ixid=MnwxfDB8MXxyYW5kb218MHx8Y2FubmFiaXMscGxhbnR8fHx8fHx8MTY3NTAyODkxMQ&ixlib=rb-4.0.3&q=80&w=800" alt="กัญชง" class="crop-image mb-2">
-                <p class="crop-label text-muted">Hemp (กัญชง)</p>
-            </div>
-            <div class="col-12 col-md-4 text-center">
-                <img src="https://images.unsplash.com/photo-1579308107698-c1e9565e3153?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=600&ixid=MnwxfDB8MXxyYW5kb218MHx8bWVkaWNpbmFsLG11c2hyb29tfHx8fHx8fDE2NzUwMjg5NDE&ixlib=rb-4.0.3&q=80&w=800" alt="เห็ดยา" class="crop-image mb-2">
-                <p class="crop-label text-muted">Medicinal Mushroom</p>
-            </div>
-        </div>
-
-        <div class="row g-4 mb-5">
-            <div class="col-12 col-lg-6">
-                <div class="card tech-card p-4">
-                    <div class="card-header d-flex align-items-center justify-content-between mb-3">
-                        <h4 class="card-title h5 mb-0" style="color: var(--tech-orange);">TEMPERATURE</h4>
-                        <span class="fs-4 text-muted">°C</span>
-                    </div>
-                    <div id="tempGauge" class="gauge-container"></div>
-                </div>
-            </div>
-            <div class="col-12 col-lg-6">
-                <div class="card tech-card p-4">
-                    <div class="card-header d-flex align-items-center justify-content-between mb-3">
-                        <h4 class="card-title h5 mb-0" style="color: var(--tech-blue);">HUMIDITY</h4>
-                        <span class="fs-4 text-muted">%</span>
-                    </div>
-                    <div id="humGauge" class="gauge-container"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12">
-                <div class="card tech-card p-4">
-                    <div class="card-header d-flex align-items-center justify-content-between mb-4">
-                        <h4 class="card-title h5 mb-0 text-muted">แนวโน้มย้อนหลัง (Historical Trend)</h4>
-                        <div class="btn-group" role="group" aria-label="Time Range">
-                            <input type="radio" class="btn-check" name="timeRange" id="btn1d" checked onclick="updateCharts(1)">
-                            <label class="btn btn-outline-primary" for="btn1d">1 วัน</label>
-                            <input type="radio" class="btn-check" name="timeRange" id="btn7d" onclick="updateCharts(7)">
-                            <label class="btn btn-outline-primary" for="btn7d">7 วัน</label>
-                            <input type="radio" class="btn-check" name="timeRange" id="btn30d" onclick="updateCharts(30)">
-                            <label class="btn btn-outline-primary" for="btn30d">1 เดือน</label>
-                        </div>
-                    </div>
-                    <div id="line_chart"></div>
-                </div>
-            </div>
-        </div>
+        <div id="line_chart">กำลังโหลดกราฟ...</div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-        google.charts.load('current', {'packages':['corechart', 'gauge']});
-        google.charts.setOnLoadCallback(initializeGauges);
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(() => drawChart(1));
 
-        var tempGauge, humGauge;
-        var gauges_options = {
-            min: 0, max: 100,
-            yellowFrom: 65, yellowTo: 85,
-            redFrom: 85, redTo: 100,
-            minorTicks: 5,
-            majorTicks: ['0', '20', '40', '60', '80', '100'],
-            redColor: '#e74c3c',
-            yellowColor: '#f1c40f',
-            greenColor: '#2ecc71',
-            width: 300, height: 300
-        };
-
-        function initializeGauges() {
-            tempGauge = new google.visualization.Gauge(document.getElementById('tempGauge'));
-            humGauge = new google.visualization.Gauge(document.getElementById('humGauge'));
-            
-            // วาดกราฟเส้นเริ่มต้น
-            drawChart(1);
-        }
-
-        // Logic ดึงข้อมูลจริงจาก Google Sheets
         function drawChart(days) {
             const sheetID = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
-            const queryUrl = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:csv&tq=select * order by A desc limit ${days * 200}`;
+            // ดึงข้อมูล 100 แถวแรกเพื่อความเร็วในการแสดงผล Real-time
+            const query = new google.visualization.Query(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tq=select A,B,C order by A desc limit ${days * 200}`);
             
-            fetch(queryUrl)
-                .then(response => response.text())
-                .then(csvText => {
-                    const dataDataTable = google.visualization.arrayToDataTable(
-                        google.visualization.csvToDataTable(csvText)
-                    );
+            query.send(response => {
+                if (response.isError()) {
+                    document.getElementById('line_chart').innerHTML = "Error: " + response.getMessage();
+                    return;
+                }
+                const data = response.getDataTable();
+                
+                // อัปเดตตัวเลขล่าสุด (แถวที่ 0 คือล่าสุดเพราะเรา order by A desc)
+                if (data.getNumberOfRows() > 0) {
+                    let t = data.getValue(0, 1);
+                    let h = data.getValue(0, 2);
+                    document.getElementById('t_val').innerText = (typeof t === 'number' ? t.toFixed(1) : t) + "°C";
+                    document.getElementById('h_val').innerText = (typeof h === 'number' ? h.toFixed(1) : h) + "%";
+                }
 
-                    if (dataDataTable.getNumberOfRows() > 0) {
-                        var latestData = dataDataTable.getSortedRows([{column: 0, desc: true}])[0];
-                        var currentTemp = dataDataTable.getValue(latestData, 1);
-                        var currentHum = dataDataTable.getValue(latestData, 2);
-                        
-                        tempGauge.draw(google.visualization.arrayToDataTable([['Label', 'Value'],['Temp', currentTemp]]), gauges_options);
-                        humGauge.draw(google.visualization.arrayToDataTable([['Label', 'Value'],['Hum', currentHum]]), gauges_options);
-                    }
+                // สร้าง View ใหม่และเรียงลำดับจากเก่าไปใหม่ (เพื่อให้กราฟวิ่งจากซ้ายไปขวา)
+                const view = new google.visualization.DataView(data);
+                view.setRows(data.getSortedRows([{column: 0, asc: true}]));
+                
+                const options = {
+                    curveType: 'function',
+                    legend: { position: 'bottom' },
+                    colors: ['#e74c3c', '#3498db'],
+                    hAxis: { title: 'Timeline', gridlines: { count: 10 } },
+                    vAxis: { title: 'Value', gridlines: { color: '#eee' }, viewWindow: { min: 0 } },
+                    chartArea: { width: '85%', height: '70%' },
+                    interpolateNulls: true
+                };
 
-                    const view = new google.visualization.DataView(dataDataTable);
-                    view.setRows(dataDataTable.getSortedRows([{column: 0, asc: true}]));
-
-                    var chartOptions = {
-                        curveType: 'function',
-                        legend: { position: 'bottom', textStyle: { color: '#e4e6eb' } },
-                        colors: ['#e74c3c', '#3498db'],
-                        backgroundColor: '#1e2125',
-                        hAxis: { title: 'เวลาบันทึก', textStyle: { color: '#e4e6eb' }, gridlines: { color: '#333' } },
-                        vAxis: { title: 'ค่าที่วัดได้ (°C / %)', textStyle: { color: '#e4e6eb' }, gridlines: { color: '#eee' }, viewWindow: { min: 0 } },
-                        chartArea: { width: '85%', height: '70%' },
-                        interpolateNulls: true
-                    };
-                    
-                    const chart = new google.visualization.LineChart(document.getElementById('line_chart'));
-                    chart.draw(view, chartOptions);
-                })
-                .catch(error => console.error('Error drawing chart:', error));
+                const chart = new google.visualization.LineChart(document.getElementById('line_chart'));
+                chart.draw(view, options);
+            });
         }
-
-        function updateCharts(days) {
-            drawChart(days);
-        }
-
-        setInterval(function() {
-            var now = new Date();
-            var dateTimeString = now.toLocaleString('th-TH', { hour12: false });
-            document.getElementById('dateTime').innerText = dateTimeString;
-        }, 1000);
-        
-        setInterval(function() {
-            drawChart(1);
-        }, 30000);
+        // รีเฟรชอัตโนมัติทุก 1 นาที
+        setInterval(() => drawChart(1), 60000);
     </script>
 </body>
 </html>
