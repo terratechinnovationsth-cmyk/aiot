@@ -49,34 +49,42 @@
             justify-content: space-between;
         }
 
-        /* --- ส่วนของ Half-Gauge Custom CSS --- */
+        /* --- Half-Gauge UI --- */
         .gauge-wrapper {
             position: relative;
-            width: 200px;
-            height: 100px; /* ครึ่งวงกลม */
+            width: 240px;
+            height: 120px;
             margin: 0 auto;
             overflow: hidden;
         }
 
         .gauge-bg {
-            width: 200px;
-            height: 200px;
+            width: 240px;
+            height: 240px;
             border-radius: 50%;
-            border: 20px solid transparent;
+            background: #222; /* พื้นหลังกันพลาด */
+            mask: radial-gradient(farthest-side, transparent 75%, white 76%);
+            -webkit-mask: radial-gradient(farthest-side, transparent 75%, white 76%);
         }
 
-        /* ไล่เฉดสีอุณหภูมิ (เขียว -> เหลือง -> แดง) */
+        /* Temp Gradient: แบ่ง 4 ช่วงสี (0-15-30-45-60) */
         .temp-gradient {
-            background: conic-gradient(from -90deg, #2ecc71 0deg, #f1c40f 90deg, #e74c3c 180deg);
-            mask: radial-gradient(farthest-side, transparent 79%, white 80%);
-            -webkit-mask: radial-gradient(farthest-side, transparent 79%, white 80%);
+            background: conic-gradient(from -90deg, 
+                #2ecc71 0deg, #2ecc71 45deg,   /* เขียว 0-15 */
+                #f1c40f 45deg, #f1c40f 90deg,  /* เหลือง 16-30 */
+                #e67e22 90deg, #e67e22 135deg, /* ส้ม 31-45 */
+                #e74c3c 135deg, #e74c3c 180deg /* แดง 46-60 */
+            );
         }
 
-        /* ไล่เฉดสีความชื้น (ฟ้าอ่อน -> น้ำเงินเข้ม) */
+        /* Hum Gradient: แบ่ง 4 ช่วงสี (0-25-50-75-100) */
         .hum-gradient {
-            background: conic-gradient(from -90deg, #a5f3fc 0deg, #00d2ff 90deg, #004e92 180deg);
-            mask: radial-gradient(farthest-side, transparent 79%, white 80%);
-            -webkit-mask: radial-gradient(farthest-side, transparent 79%, white 80%);
+            background: conic-gradient(from -90deg, 
+                #a5f3fc 0deg, #a5f3fc 45deg,   /* ฟ้าอ่อน 0-25 */
+                #00d2ff 45deg, #00d2ff 90deg,  /* ฟ้า 26-50 */
+                #004e92 90deg, #004e92 135deg, /* น้ำเงิน 51-75 */
+                #002147 135deg, #002147 180deg /* น้ำเงินเข้ม 76-100 */
+            );
         }
 
         .needle {
@@ -84,47 +92,40 @@
             bottom: 0;
             left: 50%;
             width: 4px;
-            height: 85px;
+            height: 100px;
             background: #ffffff;
             transform-origin: bottom center;
-            transform: translateX(-50%) rotate(-90deg); /* เริ่มที่ 0 */
-            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%) rotate(-90deg);
+            transition: transform 2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
             z-index: 10;
-            border-radius: 4px;
+            border-radius: 10px;
         }
 
-        .needle::after {
-            content: '';
+        .needle-pivot {
             position: absolute;
-            bottom: -5px;
+            bottom: -8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
             background: #ffffff;
             border-radius: 50%;
+            z-index: 11;
         }
 
         .value-display {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: bold;
             color: #ffffff;
             margin-top: 10px;
         }
 
-        .unit { font-size: 1rem; color: #8b949e; }
+        .unit { font-size: 1.1rem; color: #8b949e; }
 
         #line_chart { width: 100%; height: 400px; background: transparent; }
 
-        .btn-group-tech .btn {
-            border-color: var(--border-color);
-            color: #8b949e;
-        }
-
-        .btn-group-tech .btn:hover, .btn-group-tech .btn.active-btn {
-            background-color: #1f6feb;
-            color: white;
-        }
+        .btn-group-tech .btn { border-color: var(--border-color); color: #8b949e; }
+        .btn-group-tech .btn:hover, .btn-group-tech .btn.active-btn { background-color: #1f6feb; color: white; }
     </style>
 </head>
 <body>
@@ -133,7 +134,7 @@
         <div class="container d-md-flex justify-content-between align-items-center text-md-start">
             <div>
                 <h1 class="h3 dashboard-title mb-1">TERRATECH INNOVATION</h1>
-                <p class="text-secondary mb-0">Professional Environment Gauge</p>
+                <p class="text-secondary mb-0">Agricultural Precision Gauges</p>
             </div>
             <div class="text-md-end mt-3 mt-md-0">
                 <h2 id="clockDisplay" class="h4 mb-0 text-light" style="font-weight: 300;">-</h2>
@@ -145,20 +146,22 @@
         <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <div class="tech-card text-center">
-                    <div class="label-text"><span>Temperature</span><span>°C</span></div>
+                    <div class="label-text"><span>Temperature (0-60)</span><span>°C</span></div>
                     <div class="gauge-wrapper">
                         <div class="gauge-bg temp-gradient"></div>
                         <div id="tempNeedle" class="needle"></div>
+                        <div class="needle-pivot"></div>
                     </div>
                     <div class="value-display" id="t_val">--</div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="tech-card text-center">
-                    <div class="label-text"><span>Humidity</span><span>%</span></div>
+                    <div class="label-text"><span>Humidity (0-100)</span><span>%</span></div>
                     <div class="gauge-wrapper">
                         <div class="gauge-bg hum-gradient"></div>
                         <div id="humNeedle" class="needle"></div>
+                        <div class="needle-pivot"></div>
                     </div>
                     <div class="value-display" id="h_val">--</div>
                 </div>
@@ -201,16 +204,20 @@
                     let t = data.getValue(0, 1);
                     let h = data.getValue(0, 2);
                     
-                    // อัปเดตตัวเลข
                     document.getElementById('t_val').innerHTML = (typeof t === 'number' ? t.toFixed(1) : t) + '<span class="unit">°C</span>';
                     document.getElementById('h_val').innerHTML = (typeof h === 'number' ? h.toFixed(1) : h) + '<span class="unit">%</span>';
                     
-                    // --- คำนวณองศาเข็ม (0-100% แมพเป็น -90 ถึง 90 องศา) ---
-                    const tDeg = (t * 1.8) - 90;
-                    const hDeg = (h * 1.8) - 90;
+                    // --- คำนวณองศาเข็ม (Smooth Needle Logic) ---
+                    // อุณหภูมิ: 0-60 องศา แมพเป็น -90 ถึง 90 องศา (1 องศาเซลเซียส = 3 องศาบนหน้าปัด)
+                    let tMapped = (t * 3) - 90;
+                    if(tMapped > 90) tMapped = 90; if(tMapped < -90) tMapped = -90;
+
+                    // ความชื้น: 0-100% แมพเป็น -90 ถึง 90 องศา (1% = 1.8 องศาบนหน้าปัด)
+                    let hMapped = (h * 1.8) - 90;
+                    if(hMapped > 90) hMapped = 90; if(hMapped < -90) hMapped = -90;
                     
-                    document.getElementById('tempNeedle').style.transform = `translateX(-50%) rotate(${tDeg}deg)`;
-                    document.getElementById('humNeedle').style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
+                    document.getElementById('tempNeedle').style.transform = `translateX(-50%) rotate(${tMapped}deg)`;
+                    document.getElementById('humNeedle').style.transform = `translateX(-50%) rotate(${hMapped}deg)`;
                 }
 
                 const view = new google.visualization.DataView(data);
