@@ -1,67 +1,55 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TerraTech Precision Dashboard</title>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f0f4f7; text-align: center; }
-        header { background: linear-gradient(135deg, #1a2a6c, #b21f1f); color: white; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; flex: 1; min-width: 250px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .value { font-size: 2.5rem; font-weight: bold; color: #2c3e50; }
-        .chart-card { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 1000px; margin: 20px auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        #line_chart { width: 100%; height: 400px; }
-        .btn-group button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; background: #1a2a6c; color: white; cursor: pointer; }
-        .btn-group button:hover { background: #b21f1f; }
-    </style>
-</head>
-<body>
-    <header><h1>TERRATECH INNOVATION Co.,Ltd.</h1></header>
-    <div class="container">
-        <div class="card"><h3>Temperature</h3><div id="t_val" class="value">--°C</div></div>
-        <div class="card"><h3>Humidity</h3><div id="h_val" class="value">--%</div></div>
-    </div>
-    <div class="chart-card">
-        <div class="btn-group">
-            <button onclick="drawChart(1)">1 Day</button>
-            <button onclick="drawChart(7)">7 Days</button>
-            <button onclick="drawChart(30)">1 Month</button>
-        </div>
-        <div id="line_chart"></div>
-    </div>
+<script>
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(() => drawChart(1));
 
-    <script>
-        google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(() => drawChart(1));
-
-        function drawChart(days) {
-            const sheetID = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
-            const rowLimit = days * 2880; // บันทึกทุก 30 วินาที
-            const query = new google.visualization.Query(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tq=select A,B,C order by A desc limit ${rowLimit}`);
+    function drawChart(days) {
+        // แทนที่ด้วย ID ของคุณ (ตรวจสอบให้แน่ใจว่าถูกต้อง)
+        const sheetID = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
+        
+        // ใช้ Query แบบระบุช่วงข้อมูลที่แน่นอน
+        // A คือ Timestamp, B คือ Temp, C คือ Humidity
+        const queryUrl = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&tq=select A,B,C order by A desc limit ${days * 200}`;
+        
+        const query = new google.visualization.Query(queryUrl);
+        query.send(response => {
+            if (response.isError()) {
+                console.error('Error in query: ' + response.getMessage());
+                return;
+            }
+            const data = response.getDataTable();
             
-            query.send(response => {
-                if (response.isError()) return;
-                const data = response.getDataTable();
-                
-                // อัปเดตตัวเลขล่าสุด
-                document.getElementById('t_val').innerText = data.getValue(0, 1).toFixed(1) + "°C";
-                document.getElementById('h_val').innerText = data.getValue(0, 2).toFixed(1) + "%";
+            // 1. อัปเดตตัวเลขล่าสุดบน Dashboard
+            if (data.getNumberOfRows() > 0) {
+                // ดึงค่าแถวบนสุด (ล่าสุด)
+                const latestT = data.getValue(0, 1);
+                const latestH = data.getValue(0, 2);
+                document.getElementById('t_val').innerText = (latestT ? latestT.toFixed(1) : "--") + "°C";
+                document.getElementById('h_val').innerText = (latestH ? latestH.toFixed(1) : "--") + "%";
+            }
 
-                // วาดกราฟ
-                const view = new google.visualization.DataView(data);
-                view.setRows(data.getSortedRows([{column: 0, asc: true}]));
-                
-                new google.visualization.LineChart(document.getElementById('line_chart')).draw(view, {
-                    curveType: 'function', legend: 'bottom',
-                    colors: ['#e74c3c', '#3498db'],
-                    hAxis: { title: 'Timeline' },
-                    vAxis: { title: 'Value', gridlines: { color: '#eee' } }
-                });
-            });
-        }
-        setInterval(() => drawChart(1), 30000);
-    </script>
-</body>
-</html>
+            // 2. จัดการข้อมูลสำหรับวาดกราฟ
+            const view = new google.visualization.DataView(data);
+            // เรียงลำดับจากเก่าไปใหม่เพื่อให้เส้นกราฟวิ่งจากซ้ายไปขวา
+            view.setRows(data.getSortedRows([{column: 0, asc: true}]));
+            
+            const options = {
+                curveType: 'function',
+                legend: { position: 'bottom' },
+                colors: ['#e74c3c', '#3498db'],
+                hAxis: { title: 'Timeline (Date/Time)', textStyle: { fontSize: 10 } },
+                vAxis: { title: 'Value', gridlines: { color: '#eee' } },
+                chartArea: { width: '85%', height: '70%' },
+                // เพิ่มการตั้งค่าให้กราฟแสดงผลแม้ข้อมูลยังน้อย
+                interpolateNulls: true
+            };
+
+            const chart = new google.visualization.LineChart(document.getElementById('line_chart'));
+            chart.draw(view, options);
+        });
+    }
+
+    // รีเฟรชข้อมูลทุก 1 นาที
+    setInterval(() => {
+        drawChart(1);
+    }, 60000);
+</script>
