@@ -7,14 +7,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-        /* โทนสีตามภาพอ้างอิง */
         :root {
-            --bg-dark: #0b0e11;       /* พื้นหลังหลักดำสนิท */
-            --card-bg: #161b22;       /* พื้นหลังการ์ดเทาเข้ม */
-            --text-main: #e4e6eb;     /* ตัวอักษรหลักขาวเทา */
-            --accent-orange: #ff9f43; /* สีส้มสำหรับ Temperature */
-            --accent-blue: #00d2ff;   /* สีฟ้าสำหรับ Humidity */
-            --border-color: #30363d;  /* สีเส้นขอบ */
+            --bg-dark: #0b0e11;
+            --card-bg: #161b22;
+            --text-main: #e4e6eb;
+            --border-color: #30363d;
         }
 
         body { 
@@ -31,13 +28,8 @@
             margin-bottom: 30px;
         }
 
-        .dashboard-title {
-            font-weight: bold;
-            letter-spacing: 1px;
-            color: #ffffff;
-        }
+        .dashboard-title { font-weight: bold; color: #ffffff; }
 
-        /* การ์ดสไตล์ภาพอ้างอิง */
         .tech-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -57,43 +49,81 @@
             justify-content: space-between;
         }
 
+        /* --- ส่วนของ Half-Gauge Custom CSS --- */
+        .gauge-wrapper {
+            position: relative;
+            width: 200px;
+            height: 100px; /* ครึ่งวงกลม */
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .gauge-bg {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 20px solid transparent;
+        }
+
+        /* ไล่เฉดสีอุณหภูมิ (เขียว -> เหลือง -> แดง) */
+        .temp-gradient {
+            background: conic-gradient(from -90deg, #2ecc71 0deg, #f1c40f 90deg, #e74c3c 180deg);
+            mask: radial-gradient(farthest-side, transparent 79%, white 80%);
+            -webkit-mask: radial-gradient(farthest-side, transparent 79%, white 80%);
+        }
+
+        /* ไล่เฉดสีความชื้น (ฟ้าอ่อน -> น้ำเงินเข้ม) */
+        .hum-gradient {
+            background: conic-gradient(from -90deg, #a5f3fc 0deg, #00d2ff 90deg, #004e92 180deg);
+            mask: radial-gradient(farthest-side, transparent 79%, white 80%);
+            -webkit-mask: radial-gradient(farthest-side, transparent 79%, white 80%);
+        }
+
+        .needle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            height: 85px;
+            background: #ffffff;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(-90deg); /* เริ่มที่ 0 */
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            border-radius: 4px;
+        }
+
+        .needle::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            background: #ffffff;
+            border-radius: 50%;
+        }
+
         .value-display {
-            font-size: 2.8rem;
+            font-size: 2.2rem;
             font-weight: bold;
             color: #ffffff;
-            margin: 10px 0;
+            margin-top: 10px;
         }
 
-        .unit {
-            font-size: 1.2rem;
-            color: #8b949e;
-            margin-left: 5px;
-        }
+        .unit { font-size: 1rem; color: #8b949e; }
 
-        /* ส่วนของปุ่มกด */
+        #line_chart { width: 100%; height: 400px; background: transparent; }
+
         .btn-group-tech .btn {
             border-color: var(--border-color);
             color: #8b949e;
-            background: transparent;
         }
 
         .btn-group-tech .btn:hover, .btn-group-tech .btn.active-btn {
             background-color: #1f6feb;
             color: white;
-            border-color: #58a6ff;
-        }
-
-        /* กราฟ */
-        #line_chart {
-            width: 100%;
-            height: 400px;
-            background: transparent;
-        }
-
-        .refresh-text {
-            font-size: 0.8rem;
-            color: #58a6ff;
-            margin-top: 10px;
         }
     </style>
 </head>
@@ -102,35 +132,35 @@
     <header class="text-center">
         <div class="container d-md-flex justify-content-between align-items-center text-md-start">
             <div>
-                <h1 class="h3 dashboard-title mb-1">TERRATECH INNOVATIONS</h1>
-                <p class="text-secondary mb-0">Agricultural Environmental Monitoring</p>
+                <h1 class="h3 dashboard-title mb-1">TERRATECH INNOVATION</h1>
+                <p class="text-secondary mb-0">Professional Environment Gauge</p>
             </div>
             <div class="text-md-end mt-3 mt-md-0">
-                <h2 id="clockDisplay" class="h4 mb-0 text-light" style="font-weight: 300;">Friday 23:45</h2>
+                <h2 id="clockDisplay" class="h4 mb-0 text-light" style="font-weight: 300;">-</h2>
             </div>
         </div>
     </header>
 
     <div class="container">
-        <div class="row g-4 mb-4 text-center">
+        <div class="row g-4 mb-4">
             <div class="col-md-6">
-                <div class="tech-card">
-                    <div class="label-text">
-                        <span>Temperature</span>
-                        <span style="color: var(--accent-orange);">🌡️</span>
+                <div class="tech-card text-center">
+                    <div class="label-text"><span>Temperature</span><span>°C</span></div>
+                    <div class="gauge-wrapper">
+                        <div class="gauge-bg temp-gradient"></div>
+                        <div id="tempNeedle" class="needle"></div>
                     </div>
-                    <div class="value-display" id="t_val">--<span class="unit">°C</span></div>
-                    <div class="refresh-text">24 h min - 25.1 Max</div>
+                    <div class="value-display" id="t_val">--</div>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="tech-card">
-                    <div class="label-text">
-                        <span>Humidity</span>
-                        <span style="color: var(--accent-blue);">💧</span>
+                <div class="tech-card text-center">
+                    <div class="label-text"><span>Humidity</span><span>%</span></div>
+                    <div class="gauge-wrapper">
+                        <div class="gauge-bg hum-gradient"></div>
+                        <div id="humNeedle" class="needle"></div>
                     </div>
-                    <div class="value-display" id="h_val">--<span class="unit">%</span></div>
-                    <div class="refresh-text">24 h min - 45.3 Max</div>
+                    <div class="value-display" id="h_val">--</div>
                 </div>
             </div>
         </div>
@@ -152,10 +182,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-        // --- 🔒 Logic การดึงข้อมูลดั้งเดิม ห้ามเปลี่ยนแปลง ---
         google.charts.load('current', {'packages':['corechart']});
         google.charts.setOnLoadCallback(() => drawChart(1));
 
@@ -173,31 +200,29 @@
                 if (data.getNumberOfRows() > 0) {
                     let t = data.getValue(0, 1);
                     let h = data.getValue(0, 2);
-                    // อัปเดตตัวเลขหน้าจอ
+                    
+                    // อัปเดตตัวเลข
                     document.getElementById('t_val').innerHTML = (typeof t === 'number' ? t.toFixed(1) : t) + '<span class="unit">°C</span>';
                     document.getElementById('h_val').innerHTML = (typeof h === 'number' ? h.toFixed(1) : h) + '<span class="unit">%</span>';
+                    
+                    // --- คำนวณองศาเข็ม (0-100% แมพเป็น -90 ถึง 90 องศา) ---
+                    const tDeg = (t * 1.8) - 90;
+                    const hDeg = (h * 1.8) - 90;
+                    
+                    document.getElementById('tempNeedle').style.transform = `translateX(-50%) rotate(${tDeg}deg)`;
+                    document.getElementById('humNeedle').style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
                 }
 
                 const view = new google.visualization.DataView(data);
                 view.setRows(data.getSortedRows([{column: 0, asc: true}]));
                 
-                // ปรับสีสันกราฟให้เป็น Dark Mode ตามภาพอ้างอิง
                 const options = {
                     curveType: 'function',
                     legend: { position: 'bottom', textStyle: { color: '#8b949e' } },
-                    colors: ['#ff9f43', '#00d2ff'], // สีส้ม และ สีฟ้า ตามภาพ
+                    colors: ['#ff9f43', '#00d2ff'],
                     backgroundColor: 'transparent',
-                    hAxis: { 
-                        title: 'Timeline', 
-                        textStyle: { color: '#8b949e' },
-                        gridlines: { color: '#161b22' } 
-                    },
-                    vAxis: { 
-                        title: 'Value', 
-                        textStyle: { color: '#8b949e' },
-                        gridlines: { color: '#161b22' },
-                        viewWindow: { min: 0 } 
-                    },
+                    hAxis: { textStyle: { color: '#8b949e' }, gridlines: { color: '#30363d' } },
+                    vAxis: { textStyle: { color: '#8b949e' }, gridlines: { color: '#30363d' }, viewWindow: { min: 0 } },
                     chartArea: { width: '90%', height: '70%' },
                     interpolateNulls: true
                 };
@@ -207,22 +232,14 @@
             });
         }
 
-        // ฟังก์ชันแสดงเวลาแบบในภาพอ้างอิง
         function updateClock() {
             const now = new Date();
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const dayName = days[now.getDay()];
-            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('clockDisplay').innerText = dayName + ' ' + timeStr;
+            document.getElementById('clockDisplay').innerText = days[now.getDay()] + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
         }
         setInterval(updateClock, 1000);
         updateClock();
-
         setInterval(() => drawChart(1), 60000);
     </script>
 </body>
 </html>
-
-
-
-
