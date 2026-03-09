@@ -3,72 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TerraTech Dashboard | Monitoring System</title>
+    <title>TerraTech Dashboard | Dark Mode Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        header { background: linear-gradient(135deg, #1a2a6c, #b21f1f); color: white; padding: 2rem 0; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .card { border: none; border-radius: 15px; box-shadow: 0 6px 15px rgba(0,0,0,0.05); transition: transform 0.3s; }
-        .card:hover { transform: translateY(-5px); }
-        .value-display { font-size: 3rem; font-weight: bold; color: #212529; }
-        .unit { font-size: 1.2rem; color: #6c757d; }
-        #line_chart { width: 100%; height: 450px; min-height: 400px; }
-        .btn-group-custom .btn { padding: 10px 25px; font-weight: 600; }
+        /* โทนสีตามภาพอ้างอิง */
+        :root {
+            --bg-dark: #0b0e11;       /* พื้นหลังหลักดำสนิท */
+            --card-bg: #161b22;       /* พื้นหลังการ์ดเทาเข้ม */
+            --text-main: #e4e6eb;     /* ตัวอักษรหลักขาวเทา */
+            --accent-orange: #ff9f43; /* สีส้มสำหรับ Temperature */
+            --accent-blue: #00d2ff;   /* สีฟ้าสำหรับ Humidity */
+            --border-color: #30363d;  /* สีเส้นขอบ */
+        }
+
+        body { 
+            background-color: var(--bg-dark); 
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding-bottom: 50px;
+        }
+
+        header {
+            padding: 30px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .dashboard-title {
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #ffffff;
+        }
+
+        /* การ์ดสไตล์ภาพอ้างอิง */
+        .tech-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            height: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .label-text {
+            color: #8b949e;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .value-display {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 10px 0;
+        }
+
+        .unit {
+            font-size: 1.2rem;
+            color: #8b949e;
+            margin-left: 5px;
+        }
+
+        /* ส่วนของปุ่มกด */
+        .btn-group-tech .btn {
+            border-color: var(--border-color);
+            color: #8b949e;
+            background: transparent;
+        }
+
+        .btn-group-tech .btn:hover, .btn-group-tech .btn.active-btn {
+            background-color: #1f6feb;
+            color: white;
+            border-color: #58a6ff;
+        }
+
+        /* กราฟ */
+        #line_chart {
+            width: 100%;
+            height: 400px;
+            background: transparent;
+        }
+
+        .refresh-text {
+            font-size: 0.8rem;
+            color: #58a6ff;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
     <header class="text-center">
-        <div class="container">
-            <h1 class="display-5 fw-bold">TERRATECH INNOVATION</h1>
-            <p class="lead opacity-75">Agricultural Environmental Monitoring System</p>
+        <div class="container d-md-flex justify-content-between align-items-center text-md-start">
+            <div>
+                <h1 class="h3 dashboard-title mb-1">TERRATECH INNOVATION</h1>
+                <p class="text-secondary mb-0">Agricultural Environmental Monitoring</p>
+            </div>
+            <div class="text-md-end mt-3 mt-md-0">
+                <h2 id="clockDisplay" class="h4 mb-0 text-light" style="font-weight: 300;">Friday 23:45</h2>
+            </div>
         </div>
     </header>
 
     <div class="container">
-        <div class="row g-4 mb-5 text-center">
+        <div class="row g-4 mb-4 text-center">
             <div class="col-md-6">
-                <div class="card p-4">
-                    <h3 class="text-danger h5 text-uppercase fw-bold mb-3">Temperature</h3>
+                <div class="tech-card">
+                    <div class="label-text">
+                        <span>Temperature</span>
+                        <span style="color: var(--accent-orange);">🌡️</span>
+                    </div>
                     <div class="value-display" id="t_val">--<span class="unit">°C</span></div>
-                    <p class="text-muted mb-0 small">Real-time Sensor Data</p>
+                    <div class="refresh-text">24 h min - 25.1 Max</div>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="card p-4">
-                    <h3 class="text-primary h5 text-uppercase fw-bold mb-3">Humidity</h3>
+                <div class="tech-card">
+                    <div class="label-text">
+                        <span>Humidity</span>
+                        <span style="color: var(--accent-blue);">💧</span>
+                    </div>
                     <div class="value-display" id="h_val">--<span class="unit">%</span></div>
-                    <p class="text-muted mb-0 small">Real-time Sensor Data</p>
+                    <div class="refresh-text">24 h min - 45.3 Max</div>
                 </div>
             </div>
         </div>
 
         <div class="row">
             <div class="col-12">
-                <div class="card p-4 mb-5">
+                <div class="tech-card">
                     <div class="d-md-flex justify-content-between align-items-center mb-4">
-                        <h3 class="h5 fw-bold text-secondary mb-3 mb-md-0">Historical Data Trend</h3>
-                        <div class="btn-group btn-group-custom" role="group">
-                            <button type="button" class="btn btn-outline-dark" onclick="drawChart(1)">1 Day</button>
-                            <button type="button" class="btn btn-outline-dark" onclick="drawChart(7)">7 Days</button>
-                            <button type="button" class="btn btn-outline-dark" onclick="drawChart(30)">1 Month</button>
+                        <h3 class="h6 fw-bold text-uppercase m-0" style="color: #8b949e;">Historical Trend</h3>
+                        <div class="btn-group btn-group-tech mt-3 mt-md-0" role="group">
+                            <button type="button" class="btn btn-sm" onclick="drawChart(1)">1 Day</button>
+                            <button type="button" class="btn btn-sm" onclick="drawChart(7)">7 Days</button>
+                            <button type="button" class="btn btn-sm" onclick="drawChart(30)">1 Month</button>
                         </div>
                     </div>
-                    <div id="line_chart" class="bg-light rounded">กำลังโหลดกราฟ...</div>
+                    <div id="line_chart">กำลังดึงข้อมูล...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer class="text-center py-4 text-muted border-top bg-white mt-auto">
-        <small>&copy; 2026 TerraTech Innovations Co., Ltd. - All Rights Reserved.</small>
-    </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // --- ส่วน Logic การดึงข้อมูลคงเดิม 100% ---
+        // --- 🔒 Logic การดึงข้อมูลดั้งเดิม ห้ามเปลี่ยนแปลง ---
         google.charts.load('current', {'packages':['corechart']});
         google.charts.setOnLoadCallback(() => drawChart(1));
 
@@ -86,6 +173,7 @@
                 if (data.getNumberOfRows() > 0) {
                     let t = data.getValue(0, 1);
                     let h = data.getValue(0, 2);
+                    // อัปเดตตัวเลขหน้าจอ
                     document.getElementById('t_val').innerHTML = (typeof t === 'number' ? t.toFixed(1) : t) + '<span class="unit">°C</span>';
                     document.getElementById('h_val').innerHTML = (typeof h === 'number' ? h.toFixed(1) : h) + '<span class="unit">%</span>';
                 }
@@ -93,21 +181,43 @@
                 const view = new google.visualization.DataView(data);
                 view.setRows(data.getSortedRows([{column: 0, asc: true}]));
                 
+                // ปรับสีสันกราฟให้เป็น Dark Mode ตามภาพอ้างอิง
                 const options = {
                     curveType: 'function',
-                    legend: { position: 'bottom' },
-                    colors: ['#e74c3c', '#3498db'],
-                    hAxis: { title: 'Timeline', gridlines: { count: 10 }, textStyle: { color: '#666' } },
-                    vAxis: { title: 'Value', gridlines: { color: '#eee' }, viewWindow: { min: 0 }, textStyle: { color: '#666' } },
+                    legend: { position: 'bottom', textStyle: { color: '#8b949e' } },
+                    colors: ['#ff9f43', '#00d2ff'], // สีส้ม และ สีฟ้า ตามภาพ
+                    backgroundColor: 'transparent',
+                    hAxis: { 
+                        title: 'Timeline', 
+                        textStyle: { color: '#8b949e' },
+                        gridlines: { color: '#30363d' } 
+                    },
+                    vAxis: { 
+                        title: 'Value', 
+                        textStyle: { color: '#8b949e' },
+                        gridlines: { color: '#30363d' },
+                        viewWindow: { min: 0 } 
+                    },
                     chartArea: { width: '90%', height: '70%' },
-                    interpolateNulls: true,
-                    backgroundColor: 'transparent'
+                    interpolateNulls: true
                 };
 
                 const chart = new google.visualization.LineChart(document.getElementById('line_chart'));
                 chart.draw(view, options);
             });
         }
+
+        // ฟังก์ชันแสดงเวลาแบบในภาพอ้างอิง
+        function updateClock() {
+            const now = new Date();
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayName = days[now.getDay()];
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clockDisplay').innerText = dayName + ' ' + timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
         setInterval(() => drawChart(1), 60000);
     </script>
 </body>
