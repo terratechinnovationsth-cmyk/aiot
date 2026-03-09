@@ -184,4 +184,41 @@
                 // ปรับสีสันกราฟให้เป็น Dark Mode ตามภาพอ้างอิง
                 const options = {
                     curveType: 'function',
-                    legend: { position: '
+                    legend: { position: 'bottom', textStyle: { color: '#8b949e' } },
+                    colors: ['#ff9f43', '#00d2ff'], // สีส้ม และ สีฟ้า ตามภาพ
+                    backgroundColor: 'transparent',
+                    hAxis: { 
+                        title: 'Timeline', 
+                        textStyle: { color: '#8b949e' },
+                        gridlines: { color: '#30363d' } 
+                    },
+                    vAxis: { 
+                        title: 'Value', 
+                        textStyle: { color: '#8b949e' },
+                        gridlines: { color: '#30363d' },
+                        viewWindow: { min: 0 } 
+                    },
+                    chartArea: { width: '90%', height: '70%' },
+                    interpolateNulls: true
+                };
+
+                const chart = new google.visualization.LineChart(document.getElementById('line_chart'));
+                chart.draw(view, options);
+            });
+        }
+
+        // ฟังก์ชันแสดงเวลาแบบในภาพอ้างอิง
+        function updateClock() {
+            const now = new Date();
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayName = days[now.getDay()];
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clockDisplay').innerText = dayName + ' ' + timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        setInterval(() => drawChart(1), 60000);
+    </script>
+</body>
+</html>
