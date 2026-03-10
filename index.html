@@ -122,10 +122,14 @@
 
         .unit { font-size: 1.1rem; color: #8b949e; }
 
+        .minmax-text { font-size: 0.9rem; color: #8b949e; margin-top: 5px; }
+
         #line_chart { width: 100%; height: 400px; background: transparent; }
 
         .btn-group-tech .btn { border-color: var(--border-color); color: #8b949e; }
         .btn-group-tech .btn:hover, .btn-group-tech .btn.active-btn { background-color: #1f6feb; color: white; }
+        
+        .main-footer { padding: 20px 0; text-align: center; border-top: 1px solid var(--border-color); margin-top: 40px; color: #8b949e; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -153,6 +157,7 @@
                         <div class="needle-pivot"></div>
                     </div>
                     <div class="value-display" id="t_val">--</div>
+                    <div id="t_minmax" class="minmax-text">Min: -- | Max: --</div>
                 </div>
             </div>
             <div class="col-md-6">
@@ -164,6 +169,7 @@
                         <div class="needle-pivot"></div>
                     </div>
                     <div class="value-display" id="h_val">--</div>
+                    <div id="h_minmax" class="minmax-text">Min: -- | Max: --</div>
                 </div>
             </div>
         </div>
@@ -184,6 +190,10 @@
             </div>
         </div>
     </div>
+
+    <footer class="main-footer no-print">
+        <div class="container"><p class="mb-0">© 2026 บริษัทเทอร่าเทค อินโนเวชั่นส์ จำกัด | ออกแบบและพัฒนาโดย <strong>Mr.BOOK</strong></p></div>
+    </footer>
 
     <script>
         google.charts.load('current', {'packages':['corechart']});
@@ -206,57 +216,18 @@
                     
                     document.getElementById('t_val').innerHTML = (typeof t === 'number' ? t.toFixed(1) : t) + '<span class="unit">°C</span>';
                     document.getElementById('h_val').innerHTML = (typeof h === 'number' ? h.toFixed(1) : h) + '<span class="unit">%</span>';
-                    
-                    // --- คำนวณองศาเข็ม (Smooth Needle Logic) ---
-                    // อุณหภูมิ: 0-60 องศา แมพเป็น -90 ถึง 90 องศา (1 องศาเซลเซียส = 3 องศาบนหน้าปัด)
-                    // --- คำนวณองศาเข็มแบบล็อกช่วงสี (Fixed Zones) ---
-                    // --- คำนวณองศาเข็มให้ตรงกับค่าจริง (0-60 C แมพเข้ากับ -90 ถึง 90 องศา) ---
-                    // สูตร: (ค่าปัจจุบัน / ค่าสูงสุด) * ช่วงองศาทั้งหมด - องศาเริ่มต้น
-                    // (t / 60) * 180 - 90
-                    let tMapped = (t * 3) - 90; 
 
-                    // จำกัดขอบเขตไม่ให้เข็มทะลุเกจ
-                    if (tMapped > 90) tMapped = 90;
-                    if (tMapped < -90) tMapped = -90;
+                    // --- ส่วนคำนวณหาค่า Min และ Max รายวัน ---
+                    let t_min = Infinity, t_max = -Infinity;
+                    let h_min = Infinity, h_max = -Infinity;
 
-                    // ความชื้น: 0-100% แมพเป็น -90 ถึง 90 องศา (1% = 1.8 องศาบนหน้าปัด)
-                    let hMapped = (h * 1.8) - 90;
-                    if(hMapped > 90) hMapped = 90; if(hMapped < -90) hMapped = -90;
-                    
-                    document.getElementById('tempNeedle').style.transform = `translateX(-50%) rotate(${tMapped}deg)`;
-                    document.getElementById('humNeedle').style.transform = `translateX(-50%) rotate(${hMapped}deg)`;
-                }
-
-                const view = new google.visualization.DataView(data);
-                view.setRows(data.getSortedRows([{column: 0, asc: true}]));
-                
-                const options = {
-                    curveType: 'function',
-                    legend: { position: 'bottom', textStyle: { color: '#8b949e' } },
-                    colors: ['#ff9f43', '#00d2ff'],
-                    backgroundColor: 'transparent',
-                    hAxis: { textStyle: { color: '#8b949e' }, gridlines: { color: '#30363d' } },
-                    vAxis: { textStyle: { color: '#8b949e' }, gridlines: { color: '#30363d' }, viewWindow: { min: 0 } },
-                    chartArea: { width: '90%', height: '70%' },
-                    interpolateNulls: true
-                };
-
-                const chart = new google.visualization.LineChart(document.getElementById('line_chart'));
-                chart.draw(view, options);
-            });
-        }
-
-        function updateClock() {
-            const now = new Date();
-            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            document.getElementById('clockDisplay').innerText = days[now.getDay()] + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-        setInterval(() => drawChart(1), 60000);
-    </script>
-</body>
-</html>
-
-
-
+                    for (let i = 0; i < data.getNumberOfRows(); i++) {
+                        let tempVal = data.getValue(i, 1);
+                        let humVal = data.getValue(i, 2);
+                        
+                        if (tempVal !== null && typeof tempVal === 'number') {
+                            if (tempVal < t_min) t_min = tempVal;
+                            if (tempVal > t_max) t_max = tempVal;
+                        }
+                        if (humVal !== null && typeof humVal === 'number') {
+                            if (humVal < h_min)
