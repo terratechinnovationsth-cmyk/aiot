@@ -49,7 +49,6 @@
             justify-content: space-between;
         }
 
-        /* --- Half-Gauge UI --- */
         .gauge-wrapper {
             position: relative;
             width: 240px;
@@ -62,28 +61,26 @@
             width: 240px;
             height: 240px;
             border-radius: 50%;
-            background: #222; /* พื้นหลังกันพลาด */
+            background: #222;
             mask: radial-gradient(farthest-side, transparent 75%, white 76%);
             -webkit-mask: radial-gradient(farthest-side, transparent 75%, white 76%);
         }
 
-        /* Temp Gradient: แบ่ง 4 ช่วงสี (0-15-30-45-60) */
         .temp-gradient {
             background: conic-gradient(from -90deg, 
-                #2ecc71 0deg, #2ecc71 45deg,   /* เขียว 0-15 */
-                #f1c40f 45deg, #f1c40f 90deg,  /* เหลือง 16-30 */
-                #e67e22 90deg, #e67e22 135deg, /* ส้ม 31-45 */
-                #e74c3c 135deg, #e74c3c 180deg /* แดง 46-60 */
+                #2ecc71 0deg, #2ecc71 45deg,
+                #f1c40f 45deg, #f1c40f 90deg,
+                #e67e22 90deg, #e67e22 135deg,
+                #e74c3c 135deg, #e74c3c 180deg
             );
         }
 
-        /* Hum Gradient: แบ่ง 4 ช่วงสี (0-25-50-75-100) */
         .hum-gradient {
             background: conic-gradient(from -90deg, 
-                #a5f3fc 0deg, #a5f3fc 45deg,   /* ฟ้าอ่อน 0-25 */
-                #00d2ff 45deg, #00d2ff 90deg,  /* ฟ้า 26-50 */
-                #004e92 90deg, #004e92 135deg, /* น้ำเงิน 51-75 */
-                #002147 135deg, #002147 180deg /* น้ำเงินเข้ม 76-100 */
+                #a5f3fc 0deg, #a5f3fc 45deg,
+                #00d2ff 45deg, #00d2ff 90deg,
+                #004e92 90deg, #004e92 135deg,
+                #002147 135deg, #002147 180deg
             );
         }
 
@@ -121,7 +118,6 @@
         }
 
         .unit { font-size: 1.1rem; color: #8b949e; }
-
         .minmax-text { font-size: 0.9rem; color: #8b949e; margin-top: 5px; }
 
         #line_chart { width: 100%; height: 400px; background: transparent; }
@@ -201,7 +197,7 @@
 
         function drawChart(days) {
             const sheetID = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
-            const query = new google.visualization.Query(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tq=select A,B,C order by A desc limit ${days * 200}`);
+            const query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/' + sheetID + '/gviz/tq?tq=select A,B,C order by A desc limit ' + (days * 200));
             
             query.send(response => {
                 if (response.isError()) {
@@ -217,17 +213,64 @@
                     document.getElementById('t_val').innerHTML = (typeof t === 'number' ? t.toFixed(1) : t) + '<span class="unit">°C</span>';
                     document.getElementById('h_val').innerHTML = (typeof h === 'number' ? h.toFixed(1) : h) + '<span class="unit">%</span>';
 
-                    // --- ส่วนคำนวณหาค่า Min และ Max รายวัน ---
                     let t_min = Infinity, t_max = -Infinity;
                     let h_min = Infinity, h_max = -Infinity;
 
                     for (let i = 0; i < data.getNumberOfRows(); i++) {
-                        let tempVal = data.getValue(i, 1);
-                        let humVal = data.getValue(i, 2);
-                        
-                        if (tempVal !== null && typeof tempVal === 'number') {
-                            if (tempVal < t_min) t_min = tempVal;
-                            if (tempVal > t_max) t_max = tempVal;
+                        let tv = data.getValue(i, 1);
+                        let hv = data.getValue(i, 2);
+                        if (typeof tv === 'number') {
+                            if (tv < t_min) t_min = tv;
+                            if (tv > t_max) t_max = tv;
                         }
-                        if (humVal !== null && typeof humVal === 'number') {
-                            if (humVal < h_min)
+                        if (typeof hv === 'number') {
+                            if (hv < h_min) h_min = hv;
+                            if (hv > h_max) h_max = hv;
+                        }
+                    }
+
+                    document.getElementById('t_minmax').innerText = 'Min: ' + (t_min === Infinity ? '--' : t_min.toFixed(1)) + '°C | Max: ' + (t_max === -Infinity ? '--' : t_max.toFixed(1)) + '°C';
+                    document.getElementById('h_minmax').innerText = 'Min: ' + (h_min === Infinity ? '--' : h_min.toFixed(1)) + '% | Max: ' + (h_max === -Infinity ? '--' : h_max.toFixed(1)) + '%';
+                    
+                    let tMapped = (t * 3) - 90; 
+                    if (tMapped > 90) tMapped = 90;
+                    if (tMapped < -90) tMapped = -90;
+
+                    let hMapped = (h * 1.8) - 90;
+                    if (hMapped > 90) hMapped = 90;
+                    if (hMapped < -90) hMapped = -90;
+                    
+                    document.getElementById('tempNeedle').style.transform = 'translateX(-50%) rotate(' + tMapped + 'deg)';
+                    document.getElementById('humNeedle').style.transform = 'translateX(-50%) rotate(' + hMapped + 'deg)';
+                }
+
+                const view = new google.visualization.DataView(data);
+                view.setRows(data.getSortedRows([{column: 0, asc: true}]));
+                
+                const options = {
+                    curveType: 'function',
+                    legend: { position: 'bottom', textStyle: { color: '#8b949e' } },
+                    colors: ['#ff9f43', '#00d2ff'],
+                    backgroundColor: 'transparent',
+                    hAxis: { textStyle: { color: '#8b949e' }, gridlines: { color: '#30363d' } },
+                    vAxis: { textStyle: { color: '#8b949e' }, gridlines: { color: '#30363d' }, viewWindow: { min: 0 } },
+                    chartArea: { width: '90%', height: '70%' },
+                    interpolateNulls: true
+                };
+
+                const chart = new google.visualization.LineChart(document.getElementById('line_chart'));
+                chart.draw(view, options);
+            });
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            document.getElementById('clockDisplay').innerText = days[now.getDay()] + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+        setInterval(() => drawChart(1), 60000);
+    </script>
+</body>
+</html>
