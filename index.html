@@ -203,16 +203,20 @@
                     const statusEl = document.getElementById('conn-status');
                     if (diff > 5) { statusEl.innerText = "● SYSTEM OFFLINE"; statusEl.className = "status-offline"; }
                     else { statusEl.innerText = "● SYSTEM ONLINE"; statusEl.className = "status-online"; }
+                    
                     document.getElementById('t_val').innerHTML = `${t.toFixed(1)}<span class="unit">°C</span>`;
                     document.getElementById('h_val').innerHTML = `${h.toFixed(1)}<span class="unit">%</span>`;
                     document.getElementById('tempNeedle').style.transform = `translateX(-50%) rotate(${(t * 3) - 90}deg)`;
                     document.getElementById('humNeedle').style.transform = `translateX(-50%) rotate(${(h * 1.8) - 90}deg)`;
                     document.getElementById('last-sync').innerText = `Last Sync: ${data.getFormattedValue(0,0)}`;
-                    let t_min = 100, t_max = -100;
+                    
+                    let t_min = 100, t_max = -100, h_min = 100, h_max = -100;
                     for(let i=0; i<data.getNumberOfRows(); i++) {
                         let tv = data.getValue(i,1); if(tv < t_min) t_min = tv; if(tv > t_max) t_max = tv;
+                        let hv = data.getValue(i,2); if(hv < h_min) h_min = hv; if(hv > h_max) h_max = hv;
                     }
                     document.getElementById('t_minmax').innerText = `Min: ${t_min.toFixed(1)} | Max: ${t_max.toFixed(1)}`;
+                    document.getElementById('h_minmax').innerText = `Min: ${h_min.toFixed(1)} | Max: ${h_max.toFixed(1)}`;
                 }
                 new google.visualization.LineChart(document.getElementById('line_chart')).draw(data, {
                     legend: 'bottom', colors: ['#ff9f43', '#00d2ff'], backgroundColor: 'transparent',
