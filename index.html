@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TerraTech Dashboard | Professional Agromet Edition</title>
+    <title>TerraTech Dashboard | Professional Independent Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
@@ -14,178 +14,273 @@
             --border-color: #30363d;
             --status-online: #2ecc71;
             --status-offline: #e74c3c;
-            --agromet-accent: #58a6ff;
+            --accent-blue: #58a6ff;
+            --accent-orange: #ff9f43;
         }
 
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 50px; }
-        header { padding: 20px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
-        .section-title { font-size: 1rem; font-weight: bold; text-transform: uppercase; color: #8b949e; margin-bottom: 15px; padding-left: 10px; border-left: 4px solid var(--status-online); }
-        .agromet-title { border-left-color: var(--agromet-accent); }
+        body { 
+            background-color: var(--bg-dark); 
+            color: var(--text-main);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding-bottom: 50px;
+        }
 
-        .tech-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; height: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .label-text { color: #8b949e; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; display: flex; justify-content: space-between; margin-bottom: 10px; }
+        header {
+            padding: 25px 0;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(22, 27, 34, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 1000;
+        }
 
-        .gauge-wrapper { position: relative; width: 160px; height: 80px; margin: 0 auto; overflow: hidden; }
-        .gauge-bg { width: 160px; height: 160px; border-radius: 50%; background: #222; mask: radial-gradient(farthest-side, transparent 75%, white 76%); -webkit-mask: radial-gradient(farthest-side, transparent 75%, white 76%); }
-        .temp-gradient { background: conic-gradient(from -90deg, #2ecc71 0deg, #2ecc71 45deg, #f1c40f 45deg, #f1c40f 90deg, #e67e22 90deg, #e67e22 135deg, #e74c3c 135deg, #e74c3c 180deg); }
-        .hum-gradient { background: conic-gradient(from -90deg, #a5f3fc 0deg, #a5f3fc 45deg, #00d2ff 45deg, #00d2ff 90deg, #004e92 90deg, #004e92 135deg, #002147 135deg, #002147 180deg); }
-        .needle { position: absolute; bottom: 0; left: 50%; width: 2px; height: 60px; background: #ffffff; transform-origin: bottom center; transition: transform 2s; z-index: 10; }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 30px 0 15px 0;
+            padding-left: 12px;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .tech-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            height: 100%;
+            transition: transform 0.2s ease;
+        }
+
+        /* Sensor Gauges */
+        .gauge-container { text-align: center; padding: 10px; }
+        .value-big { font-size: 2.8rem; font-weight: 800; color: #ffffff; line-height: 1; margin: 15px 0; }
+        .unit { font-size: 1.2rem; color: #8b949e; margin-left: 5px; }
+
+        /* Agromet Grid - ปรับให้ไม่บีบอัด */
+        .agromet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .agro-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .agro-label { font-size: 0.75rem; color: #8b949e; margin-bottom: 8px; font-weight: 600; }
+        .agro-val { font-size: 1.3rem; font-weight: 700; color: var(--accent-blue); }
+
+        /* Forecast - แถวอิสระ */
+        .forecast-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        .forecast-card {
+            min-width: 110px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px 10px;
+            text-align: center;
+        }
+
+        .weather-icon { font-size: 1.8rem; margin: 5px 0; }
+
+        #line_chart { width: 100%; height: 300px; }
+        .badge-status { font-size: 0.75rem; padding: 5px 12px; border-radius: 50px; font-weight: bold; }
         
-        .value-display { font-size: 1.8rem; font-weight: bold; color: #ffffff; }
-        .unit { font-size: 0.8rem; color: #8b949e; }
-
-        .agromet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-        .agro-item { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center; }
-        .agro-label { font-size: 0.65rem; color: #8b949e; margin-bottom: 4px; line-height: 1.2; }
-        .agro-val { font-size: 1.1rem; font-weight: bold; color: #e4e6eb; }
-
-        #forecast-container { gap: 8px; margin-top: 10px; }
-        .forecast-day { min-width: 90px; padding: 10px 5px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid var(--border-color); text-align: center; }
-        .weather-icon { font-size: 1.4rem; margin: 2px 0; }
-        .weather-desc { font-size: 0.65rem; color: #8b949e; }
-
-        #line_chart { width: 100%; height: 220px; }
-        .main-footer { padding: 20px 0; text-align: center; border-top: 1px solid var(--border-color); margin-top: 40px; color: #8b949e; font-size: 0.8rem; }
+        .main-footer { padding: 30px 0; text-align: center; color: #8b949e; border-top: 1px solid var(--border-color); margin-top: 50px; }
     </style>
 </head>
 <body>
 
-    <header class="text-center">
-        <div class="container d-md-flex justify-content-between align-items-center text-md-start">
+    <header>
+        <div class="container d-md-flex justify-content-between align-items-center">
             <div>
-                <h1 class="h4 mb-1" style="font-weight: bold;">TERRATECH INNOVATIONS</h1>
-                <div id="connection-status" class="badge status-online">● SYSTEM ONLINE</div>
+                <h1 class="h3 mb-0 fw-bold">TERRATECH INNOVATIONS</h1>
+                <p class="text-secondary mb-0 small">Agricultural Intelligence & Agromet Dashboard</p>
             </div>
             <div class="text-md-end mt-2 mt-md-0">
-                <div id="clockDisplay" style="font-size: 1.1rem; color: #fff;">-</div>
-                <div id="last-data-time" style="font-size: 0.65rem; color: #58a6ff;">Waiting for data...</div>
+                <span id="conn-status" class="badge-status status-online">SYSTEM ONLINE</span>
+                <div id="clockDisplay" class="fw-bold mt-1" style="font-size: 1.2rem;">-</div>
             </div>
         </div>
     </header>
 
-    <div class="container">
-        <div class="section-title">Section 1: Farm Sensor Monitoring</div>
-        <div class="row g-3 mb-4">
-            <div class="col-md-3"><div class="tech-card text-center"><div class="label-text"><span>Temp</span><span>°C</span></div><div class="gauge-wrapper"><div class="gauge-bg temp-gradient"></div><div id="tempNeedle" class="needle"></div></div><div class="value-display" id="t_val">--</div></div></div>
-            <div class="col-md-3"><div class="tech-card text-center"><div class="label-text"><span>Hum</span><span>%</span></div><div class="gauge-wrapper"><div class="gauge-bg hum-gradient"></div><div id="humNeedle" class="needle"></div></div><div class="value-display" id="h_val">--</div></div></div>
-            <div class="col-md-6"><div class="tech-card"><div id="line_chart"></div></div></div>
+    <div class="container mt-4">
+        
+        <div class="section-title">Section 1: Farm Monitoring (Sensors)</div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="tech-card gauge-container">
+                    <div class="text-secondary small fw-bold text-uppercase">Temperature</div>
+                    <div class="value-big" id="t_val">--<span class="unit">°C</span></div>
+                    <div class="text-secondary small" id="t_minmax">Min: -- | Max: --</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="tech-card gauge-container">
+                    <div class="text-secondary small fw-bold text-uppercase">Humidity</div>
+                    <div class="value-big" id="h_val">--<span class="unit">%</span></div>
+                    <div class="text-secondary small" id="h_minmax">Min: -- | Max: --</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="tech-card">
+                    <div id="line_chart"></div>
+                    <div id="last-sync" class="text-info mt-2 small" style="font-size: 0.7rem;">Last Sync: Waiting...</div>
+                </div>
+            </div>
         </div>
 
-        <div class="section-title agromet-title">Section 2: Agrometeorology & Environment (อ.เมือง จ.เชียงใหม่)</div>
-        <div class="row g-3">
-            <div class="col-lg-8">
+        <div class="section-title" style="border-left-color: var(--accent-orange);">Section 2: Agrometeorology (อ.เมือง จ.เชียงใหม่)</div>
+        <div class="row">
+            <div class="col-12">
                 <div class="tech-card">
-                    <div class="agromet-grid" id="agro-grid-content">
-                        <div class="agro-item"><div class="agro-label">การคายระเหย (ET)</div><div class="agro-val" id="agro-et">--</div></div>
-                        <div class="agro-item"><div class="agro-label">อุณหภูมิดิน (0-6cm)</div><div class="agro-val" id="agro-soil-t">--</div></div>
-                        <div class="agro-item"><div class="agro-label">ความชื้นในดิน</div><div class="agro-val" id="agro-soil-m">--</div></div>
-                        <div class="agro-item"><div class="agro-label">ความเข้มแสง (Solar)</div><div class="agro-val" id="agro-solar">--</div></div>
-                        <div class="agro-item"><div class="agro-label">สะสมความร้อน (GDD)</div><div class="agro-val" id="agro-gdd">--</div></div>
-                        <div class="agro-item"><div class="agro-label">จุดน้ำค้าง (Dew Point)</div><div class="agro-val" id="agro-dew">--</div></div>
-                        <div class="agro-item"><div class="agro-label">ดัชนี UV</div><div class="agro-val" id="agro-uv">--</div></div>
-                        <div class="agro-item"><div class="agro-label">ค่าฝุ่น PM 2.5</div><div class="agro-val" id="agro-pm">--</div></div>
+                    <div class="agromet-grid">
+                        <div class="agro-item"><div class="agro-label">การคายระเหยน้ำ (ET)</div><div class="agro-val" id="agro-et">Loading...</div></div>
+                        <div class="agro-item"><div class="agro-label">อุณหภูมิดิน (0-6cm)</div><div class="agro-val" id="agro-soil-t">Loading...</div></div>
+                        <div class="agro-item"><div class="agro-label">ความชื้นในดิน</div><div class="agro-val" id="agro-soil-m">Loading...</div></div>
+                        <div class="agro-item"><div class="agro-label">ความเข้มแสง (Solar)</div><div class="agro-val" id="agro-solar">Loading...</div></div>
+                        <div class="agro-item"><div class="agro-label">สะสมความร้อน (GDD)</div><div class="agro-val" id="agro-gdd">Loading...</div></div>
+                        <div class="agro-item"><div class="agro-label">จุดน้ำค้าง (Dew Point)</div><div class="agro-val" id="agro-dew">Loading...</div></div>
+                        <div class="agro-item"><div class="agro-label">ดัชนี UV</div><div class="agro-val" id="agro-uv">Loading...</div></div>
+                        <div class="agro-item"><div class="agro-label">ค่าฝุ่น PM 2.5</div><div class="agro-val" id="agro-pm">Loading...</div></div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4">
+        </div>
+
+        <div class="section-title" style="border-left-color: #2ecc71;">Section 3: 7-Day Weather Forecast</div>
+        <div class="row">
+            <div class="col-12">
                 <div class="tech-card">
-                    <div class="label-text"><span>7-Day Forecast</span></div>
-                    <div id="forecast-container" class="d-flex justify-content-between overflow-auto pb-2"></div>
+                    <div class="forecast-scroll" id="forecast-box">
+                        <div class="w-100 text-center text-secondary">Loading Forecast Data...</div>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 
-    <footer class="main-footer">© 2026 TerraTech Innovations | ต.สันผีเสื้อ (18.87, 98.98)</footer>
+    <footer class="main-footer">
+        <div class="container">
+            © 2026 TerraTech Innovations Co., Ltd. | ต.สันผีเสื้อ อ.เมือง จ.เชียงใหม่ (18.87, 98.98)
+        </div>
+    </footer>
 
     <script>
         google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(() => { drawChart(1); getAgroData(); });
+        google.charts.setOnLoadCallback(() => {
+            fetchSensorData();
+            fetchAgroData();
+            fetchAirQuality();
+            fetchForecast();
+        });
 
-        const LAT = 18.87; const LON = 98.98;
+        const LAT = 18.87;
+        const LON = 98.98;
 
-        function drawChart(days) {
+        // 1. ดึงข้อมูลจาก Google Sheets (Sensor)
+        function fetchSensorData() {
             const sheetID = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
-            const query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/' + sheetID + '/gviz/tq?tq=select A,B,C order by A desc limit ' + (days * 200));
-            query.send(response => {
-                if (response.isError()) return;
-                const data = response.getDataTable();
+            const query = new google.visualization.Query(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tq=select A,B,C order by A desc limit 100`);
+            query.send(res => {
+                if (res.isError()) return;
+                const data = res.getDataTable();
                 if (data.getNumberOfRows() > 0) {
-                    const t = data.getValue(0, 1); const h = data.getValue(0, 2);
-                    document.getElementById('t_val').innerHTML = (t ? t.toFixed(1) : '--') + '<span class="unit">°C</span>';
-                    document.getElementById('h_val').innerHTML = (h ? h.toFixed(1) : '--') + '<span class="unit">%</span>';
-                    document.getElementById('tempNeedle').style.transform = `translateX(-50%) rotate(${(t * 3) - 90}deg)`;
-                    document.getElementById('humNeedle').style.transform = `translateX(-50%) rotate(${(h * 1.8) - 90}deg)`;
-                    document.getElementById('last-data-time').innerText = 'Last Sync: ' + data.getFormattedValue(0, 0);
+                    const t = data.getValue(0, 1);
+                    const h = data.getValue(0, 2);
+                    document.getElementById('t_val').innerHTML = `${t.toFixed(1)}<span class="unit">°C</span>`;
+                    document.getElementById('h_val').innerHTML = `${h.toFixed(1)}<span class="unit">%</span>`;
+                    document.getElementById('last-sync').innerText = `Last Sync: ${data.getFormattedValue(0,0)}`;
+                    
+                    // Min-Max Calculation
+                    let t_min = 100, t_max = 0, h_min = 100, h_max = 0;
+                    for(let i=0; i<data.getNumberOfRows(); i++) {
+                        let tv = data.getValue(i,1), hv = data.getValue(i,2);
+                        if(tv < t_min) t_min = tv; if(tv > t_max) t_max = tv;
+                        if(hv < h_min) h_min = hv; if(hv > h_max) h_max = hv;
+                    }
+                    document.getElementById('t_minmax').innerText = `Min: ${t_min.toFixed(1)} | Max: ${t_max.toFixed(1)}`;
+                    document.getElementById('h_minmax').innerText = `Min: ${h_min.toFixed(1)} | Max: ${h_max.toFixed(1)}`;
                 }
-                new google.visualization.LineChart(document.getElementById('line_chart')).draw(data, {legend: 'none', colors: ['#ff9f43', '#00d2ff'], backgroundColor: 'transparent', hAxis: {textStyle: {color: '#8b949e', fontSize: 8}}, vAxis: {textStyle: {color: '#8b949e'}}});
+                new google.visualization.LineChart(document.getElementById('line_chart')).draw(data, {
+                    legend: 'none', colors: ['#ff9f43', '#00d2ff'], backgroundColor: 'transparent',
+                    chartArea: {width: '90%', height: '80%'},
+                    hAxis: {textStyle: {color: '#8b949e', fontSize: 10}, gridlines: {color: '#30363d'}},
+                    vAxis: {textStyle: {color: '#8b949e'}, gridlines: {color: '#30363d'}}
+                });
             });
         }
 
-        function getWeatherInfo(code) {
-            const map = { 0: ['☀️','แจ่มใส'], 1: ['🌤️','เมฆบาง'], 2: ['🌤️','เมฆบาง'], 3: ['☁️','ครึ้ม'], 45: ['🌫️','หมอก'], 51: ['🌧️','ฝนตก'], 61: ['🌧️','ฝนตก'], 80: ['🌦️','ฝนไล่'], 95: ['⛈️','พายุ'] };
-            return { icon: map[code] ? map[code][0] : '☁️', desc: map[code] ? map[code][1] : 'เมฆมาก' };
+        // 2. ดึงข้อมูล Agromet (Open-Meteo Forecast API)
+        async function fetchAgroData() {
+            try {
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=uv_index,shortwave_radiation,dew_point_2m&daily=et0_fao_evapotranspiration,temperature_2m_max,temperature_2m_min&hourly=soil_temperature_0_to_6cm,soil_moisture_0_to_1cm&timezone=Asia%2FBangkok`);
+                const d = await res.json();
+                
+                document.getElementById('agro-et').innerText = `${d.daily.et0_fao_evapotranspiration[0].toFixed(2)} mm`;
+                document.getElementById('agro-soil-t').innerText = `${d.hourly.soil_temperature_0_to_6cm[0].toFixed(1)} °C`;
+                document.getElementById('agro-soil-m').innerText = `${d.hourly.soil_moisture_0_to_1cm[0].toFixed(3)} m³/m³`;
+                document.getElementById('agro-solar').innerText = `${d.current.shortwave_radiation.toFixed(0)} W/m²`;
+                document.getElementById('agro-dew').innerText = `${d.current.dew_point_2m.toFixed(1)} °C`;
+                document.getElementById('agro-uv').innerText = d.current.uv_index.toFixed(1);
+                
+                const gdd = ((d.daily.temperature_2m_max[0] + d.daily.temperature_2m_min[0]) / 2) - 10;
+                document.getElementById('agro-gdd').innerText = `${Math.max(0, gdd).toFixed(1)} °C/d`;
+            } catch (e) { console.error("Agro API Error"); }
         }
 
-        async function getAgroData() {
+        // 3. ดึงข้อมูลคุณภาพอากาศ (แยก API เพื่อความเร็ว)
+        async function fetchAirQuality() {
             try {
-                // แยกการดึงข้อมูลเพื่อความเสถียร
-                const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=uv_index,shortwave_radiation,dew_point_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,et0_fao_evapotranspiration&hourly=soil_temperature_0_to_6cm,soil_moisture_0_to_1cm&timezone=Asia%2FBangkok&forecast_days=7`;
-                const airUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=pm2_5`;
+                const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=pm2_5`);
+                const d = await res.json();
+                const pm = d.current.pm2_5;
+                const el = document.getElementById('agro-pm');
+                el.innerText = `${pm.toFixed(1)} µg/m³`;
+                el.style.color = pm > 37.5 ? '#ff4d4d' : '#00e676';
+            } catch (e) { document.getElementById('agro-pm').innerText = "N/A"; }
+        }
 
-                const [resF, resA] = await Promise.all([fetch(forecastUrl), fetch(airUrl)]);
-                const d = await resF.json();
-                const a = await resA.json();
+        // 4. พยากรณ์อากาศ 7 วัน
+        async function fetchForecast() {
+            try {
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Asia%2FBangkok`);
+                const d = await res.json();
+                const box = document.getElementById('forecast-box');
+                box.innerHTML = '';
+                
+                const map = { 0: ['☀️','แจ่มใส'], 1: ['🌤️','เมฆบาง'], 2: ['🌤️','เมฆบาง'], 3: ['☁️','ครึ้ม'], 45: ['🌫️','หมอก'], 51: ['🌧️','ฝนตก'], 61: ['🌧️','ฝนตก'], 80: ['🌦️','ฝนไล่'], 95: ['⛈️','พายุ'] };
 
-                // อัปเดตข้อมูล Agromet (ตรวจสอบการมีอยู่ของข้อมูลก่อนแสดงผล)
-                if (d.daily) {
-                    document.getElementById('agro-et').innerHTML = d.daily.et0_fao_evapotranspiration[0].toFixed(2) + ' <span class="unit">mm</span>';
-                    const gdd = ((d.daily.temperature_2m_max[0] + d.daily.temperature_2m_min[0]) / 2) - 10;
-                    document.getElementById('agro-gdd').innerHTML = Math.max(0, gdd).toFixed(1) + ' <span class="unit">°C/d</span>';
-                    
-                    // แสดงพยากรณ์ 7 วัน
-                    const fContainer = document.getElementById('forecast-container');
-                    fContainer.innerHTML = '';
-                    d.daily.time.forEach((date, i) => {
-                        const info = getWeatherInfo(d.daily.weathercode[i]);
-                        const day = new Date(date);
-                        const div = document.createElement('div');
-                        div.className = 'forecast-day';
-                        div.innerHTML = `<div style="font-size: 0.7rem; color: #8b949e;">${day.toLocaleDateString('th-TH',{weekday:'short'})}</div>
-                                         <div style="font-size: 0.6rem; color: #58a6ff;">${day.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit'})}</div>
-                                         <div class="weather-icon">${info.icon}</div>
-                                         <div class="weather-desc">${info.desc}</div>
-                                         <div style="font-size: 0.9rem; font-weight: bold; color: #ff9f43;">${d.daily.temperature_2m_max[i]}°</div>`;
-                        fContainer.appendChild(div);
-                    });
-                }
-
-                if (d.current) {
-                    document.getElementById('agro-solar').innerHTML = d.current.shortwave_radiation.toFixed(0) + ' <span class="unit">W/m²</span>';
-                    document.getElementById('agro-dew').innerHTML = d.current.dew_point_2m.toFixed(1) + ' <span class="unit">°C</span>';
-                    document.getElementById('agro-uv').innerText = d.current.uv_index.toFixed(1);
-                }
-
-                if (d.hourly) {
-                    document.getElementById('agro-soil-t').innerHTML = d.hourly.soil_temperature_0_to_6cm[0].toFixed(1) + ' <span class="unit">°C</span>';
-                    document.getElementById('agro-soil-m').innerHTML = d.hourly.soil_moisture_0_to_1cm[0].toFixed(3) + ' <span class="unit">m³/m³</span>';
-                }
-
-                if (a.current) {
-                    const pm = a.current.pm2_5;
-                    document.getElementById('agro-pm').innerText = pm.toFixed(1) + ' µg';
-                    document.getElementById('agro-pm').style.color = pm > 37.5 ? '#ff4d4d' : '#00e676';
-                }
-
-            } catch (e) { 
-                console.error("Data Load Error:", e);
-                // แสดงข้อความแจ้งเตือนถ้าโหลดไม่ได้เลย
-                document.getElementById('agro-grid-content').innerHTML += '<div class="text-danger small">API Connection Error</div>';
-            }
+                d.daily.time.forEach((date, i) => {
+                    const day = new Date(date);
+                    const code = d.daily.weathercode[i];
+                    const info = map[code] || ['☁️', 'เมฆมาก'];
+                    box.innerHTML += `
+                        <div class="forecast-card">
+                            <div class="small fw-bold">${day.toLocaleDateString('th-TH',{weekday:'short'})}</div>
+                            <div class="text-info" style="font-size:0.65rem">${day.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit'})}</div>
+                            <div class="weather-icon">${info[0]}</div>
+                            <div class="small text-secondary" style="font-size:0.6rem">${info[1]}</div>
+                            <div class="mt-2 fw-bold" style="color:var(--accent-orange)">${d.daily.temperature_2m_max[i]}°</div>
+                        </div>
+                    `;
+                });
+            } catch (e) { console.error("Forecast Error"); }
         }
 
         setInterval(() => { document.getElementById('clockDisplay').innerText = new Date().toLocaleTimeString('th-TH'); }, 1000);
-        setInterval(() => { drawChart(1); getAgroData(); }, 60000);
+        setInterval(() => { fetchSensorData(); fetchAgroData(); fetchAirQuality(); fetchForecast(); }, 60000);
     </script>
 </body>
 </html>
