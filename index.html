@@ -17,14 +17,7 @@
             --agromet-accent: #58a6ff;
         }
 
-        body { 
-            background-color: var(--bg-dark); 
-            color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding-bottom: 50px;
-        }
-
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 50px; }
         header { padding: 20px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
         .section-title { font-size: 1rem; font-weight: bold; text-transform: uppercase; color: #8b949e; margin-bottom: 15px; padding-left: 10px; border-left: 4px solid var(--status-online); }
         .agromet-title { border-left-color: var(--agromet-accent); }
@@ -32,7 +25,6 @@
         .tech-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; height: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .label-text { color: #8b949e; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; display: flex; justify-content: space-between; margin-bottom: 10px; }
 
-        /* Gauge & Charts */
         .gauge-wrapper { position: relative; width: 160px; height: 80px; margin: 0 auto; overflow: hidden; }
         .gauge-bg { width: 160px; height: 160px; border-radius: 50%; background: #222; mask: radial-gradient(farthest-side, transparent 75%, white 76%); -webkit-mask: radial-gradient(farthest-side, transparent 75%, white 76%); }
         .temp-gradient { background: conic-gradient(from -90deg, #2ecc71 0deg, #2ecc71 45deg, #f1c40f 45deg, #f1c40f 90deg, #e67e22 90deg, #e67e22 135deg, #e74c3c 135deg, #e74c3c 180deg); }
@@ -42,12 +34,15 @@
         .value-display { font-size: 1.8rem; font-weight: bold; color: #ffffff; }
         .unit { font-size: 0.8rem; color: #8b949e; }
 
-        /* Agromet Grid */
         .agromet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
         .agro-item { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center; }
         .agro-label { font-size: 0.65rem; color: #8b949e; margin-bottom: 4px; line-height: 1.2; }
         .agro-val { font-size: 1.1rem; font-weight: bold; color: #e4e6eb; }
-        .accent-val { color: var(--agromet-accent); }
+
+        #forecast-container { gap: 8px; margin-top: 10px; }
+        .forecast-day { min-width: 90px; padding: 10px 5px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid var(--border-color); text-align: center; }
+        .weather-icon { font-size: 1.4rem; margin: 2px 0; }
+        .weather-desc { font-size: 0.65rem; color: #8b949e; }
 
         #line_chart { width: 100%; height: 220px; }
         .main-footer { padding: 20px 0; text-align: center; border-top: 1px solid var(--border-color); margin-top: 40px; color: #8b949e; font-size: 0.8rem; }
@@ -71,65 +66,31 @@
     <div class="container">
         <div class="section-title">Section 1: Farm Sensor Monitoring</div>
         <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="tech-card text-center">
-                    <div class="label-text"><span>Temp</span><span>°C</span></div>
-                    <div class="gauge-wrapper"><div class="gauge-bg temp-gradient"></div><div id="tempNeedle" class="needle"></div></div>
-                    <div class="value-display" id="t_val">--</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="tech-card text-center">
-                    <div class="label-text"><span>Hum</span><span>%</span></div>
-                    <div class="gauge-wrapper"><div class="gauge-bg hum-gradient"></div><div id="humNeedle" class="needle"></div></div>
-                    <div class="value-display" id="h_val">--</div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="tech-card">
-                    <div id="line_chart"></div>
-                </div>
-            </div>
+            <div class="col-md-3"><div class="tech-card text-center"><div class="label-text"><span>Temp</span><span>°C</span></div><div class="gauge-wrapper"><div class="gauge-bg temp-gradient"></div><div id="tempNeedle" class="needle"></div></div><div class="value-display" id="t_val">--</div></div></div>
+            <div class="col-md-3"><div class="tech-card text-center"><div class="label-text"><span>Hum</span><span>%</span></div><div class="gauge-wrapper"><div class="gauge-bg hum-gradient"></div><div id="humNeedle" class="needle"></div></div><div class="value-display" id="h_val">--</div></div></div>
+            <div class="col-md-6"><div class="tech-card"><div id="line_chart"></div></div></div>
         </div>
 
-        <div class="section-title agromet-title">Section 2: Agrometeorology (อ.เมือง จ.เชียงใหม่)</div>
+        <div class="section-title agromet-title">Section 2: Agrometeorology & Environment (อ.เมือง จ.เชียงใหม่)</div>
         <div class="row g-3">
-            <div class="col-12">
+            <div class="col-lg-8">
                 <div class="tech-card">
-                    <div class="agromet-grid">
-                        <div class="agro-item">
-                            <div class="agro-label">การคายระเหยน้ำ (ET)</div>
-                            <div class="agro-val accent-val" id="agro-et">-- <span class="unit">mm</span></div>
-                        </div>
-                        <div class="agro-item">
-                            <div class="agro-label">อุณหภูมิดิน (0-6cm)</div>
-                            <div class="agro-val" id="agro-soil-t">-- <span class="unit">°C</span></div>
-                        </div>
-                        <div class="agro-item">
-                            <div class="agro-label">ความชื้นในดิน</div>
-                            <div class="agro-val" id="agro-soil-m">-- <span class="unit">m³/m³</span></div>
-                        </div>
-                        <div class="agro-item">
-                            <div class="agro-label">ความเข้มแสง (Solar)</div>
-                            <div class="agro-val" id="agro-solar">-- <span class="unit">W/m²</span></div>
-                        </div>
-                        <div class="agro-item">
-                            <div class="agro-label">สะสมความร้อน (GDD)</div>
-                            <div class="agro-val" id="agro-gdd">-- <span class="unit">°C/day</span></div>
-                        </div>
-                        <div class="agro-item">
-                            <div class="agro-label">จุดน้ำค้าง (Dew Point)</div>
-                            <div class="agro-val" id="agro-dew">-- <span class="unit">°C</span></div>
-                        </div>
-                        <div class="agro-item">
-                            <div class="agro-label">ดัชนี UV</div>
-                            <div class="agro-val" id="agro-uv">--</div>
-                        </div>
-                        <div class="agro-item">
-                            <div class="agro-label">ค่าฝุ่น PM 2.5</div>
-                            <div class="agro-val" id="agro-pm">--</div>
-                        </div>
+                    <div class="agromet-grid" id="agro-grid-content">
+                        <div class="agro-item"><div class="agro-label">การคายระเหย (ET)</div><div class="agro-val" id="agro-et">--</div></div>
+                        <div class="agro-item"><div class="agro-label">อุณหภูมิดิน (0-6cm)</div><div class="agro-val" id="agro-soil-t">--</div></div>
+                        <div class="agro-item"><div class="agro-label">ความชื้นในดิน</div><div class="agro-val" id="agro-soil-m">--</div></div>
+                        <div class="agro-item"><div class="agro-label">ความเข้มแสง (Solar)</div><div class="agro-val" id="agro-solar">--</div></div>
+                        <div class="agro-item"><div class="agro-label">สะสมความร้อน (GDD)</div><div class="agro-val" id="agro-gdd">--</div></div>
+                        <div class="agro-item"><div class="agro-label">จุดน้ำค้าง (Dew Point)</div><div class="agro-val" id="agro-dew">--</div></div>
+                        <div class="agro-item"><div class="agro-label">ดัชนี UV</div><div class="agro-val" id="agro-uv">--</div></div>
+                        <div class="agro-item"><div class="agro-label">ค่าฝุ่น PM 2.5</div><div class="agro-val" id="agro-pm">--</div></div>
                     </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="tech-card">
+                    <div class="label-text"><span>7-Day Forecast</span></div>
+                    <div id="forecast-container" class="d-flex justify-content-between overflow-auto pb-2"></div>
                 </div>
             </div>
         </div>
@@ -160,34 +121,50 @@
             });
         }
 
+        function getWeatherInfo(code) {
+            const map = { 0: ['☀️','แจ่มใส'], 1: ['🌤️','เมฆบาง'], 2: ['🌤️','เมฆบาง'], 3: ['☁️','ครึ้ม'], 45: ['🌫️','หมอก'], 51: ['🌧️','ฝนตก'], 61: ['🌧️','ฝนตก'], 80: ['🌦️','ฝนไล่'], 95: ['⛈️','พายุ'] };
+            return { icon: map[code] ? map[code][0] : '☁️', desc: map[code] ? map[code][1] : 'เมฆมาก' };
+        }
+
         async function getAgroData() {
             try {
-                // ดึงข้อมูล Agromet ทั้งหมดจาก Open-Meteo ในครั้งเดียว
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=uv_index,pm2,5,shortwave_radiation,dew_point_2m&daily=et0_fao_evapotranspiration,temperature_2m_max,temperature_2m_min&hourly=soil_temperature_0_to_6cm,soil_moisture_0_to_1cm&timezone=Asia%2FBangkok&forecast_days=1`;
-                const res = await fetch(url);
-                const d = await res.json();
+                // 1. ดึงข้อมูลพยากรณ์และเกษตร
+                const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=uv_index,shortwave_radiation,dew_point_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,et0_fao_evapotranspiration&hourly=soil_temperature_0_to_6cm,soil_moisture_0_to_1cm&timezone=Asia%2FBangkok`;
+                const airUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=pm2_5`;
 
-                // 1. ET
+                const [resF, resA] = await Promise.all([fetch(forecastUrl), fetch(airUrl)]);
+                const d = await resF.json();
+                const a = await resA.json();
+
+                // แสดงผล Agromet
                 document.getElementById('agro-et').innerHTML = d.daily.et0_fao_evapotranspiration[0].toFixed(2) + ' <span class="unit">mm</span>';
-                // 2. Soil Temp
                 document.getElementById('agro-soil-t').innerHTML = d.hourly.soil_temperature_0_to_6cm[0].toFixed(1) + ' <span class="unit">°C</span>';
-                // 3. Soil Moisture
                 document.getElementById('agro-soil-m').innerHTML = d.hourly.soil_moisture_0_to_1cm[0].toFixed(3) + ' <span class="unit">m³/m³</span>';
-                // 4. Solar Radiation
                 document.getElementById('agro-solar').innerHTML = d.current.shortwave_radiation.toFixed(0) + ' <span class="unit">W/m²</span>';
-                // 5. GDD (คำนวณจาก (Tmax+Tmin)/2 - Tbase (สมมติ Tbase=10))
+                document.getElementById('agro-dew').innerHTML = d.current.dew_point_2m.toFixed(1) + ' <span class="unit">°C</span>';
+                document.getElementById('agro-uv').innerText = d.current.uv_index.toFixed(1);
+                document.getElementById('agro-pm').innerText = a.current.pm2_5.toFixed(1) + ' µg';
+                document.getElementById('agro-pm').style.color = a.current.pm2_5 > 37.5 ? '#ff4d4d' : '#00e676';
+
                 const gdd = ((d.daily.temperature_2m_max[0] + d.daily.temperature_2m_min[0]) / 2) - 10;
                 document.getElementById('agro-gdd').innerHTML = Math.max(0, gdd).toFixed(1) + ' <span class="unit">°C/d</span>';
-                // 6. Dew Point
-                document.getElementById('agro-dew').innerHTML = d.current.dew_point_2m.toFixed(1) + ' <span class="unit">°C</span>';
-                // 7. UV
-                document.getElementById('agro-uv').innerText = d.current.uv_index.toFixed(1);
-                // 8. PM 2.5
-                const pm = d.current.pm2_5 || 0;
-                document.getElementById('agro-pm').innerHTML = pm.toFixed(1) + ' <span class="unit">µg</span>';
-                document.getElementById('agro-pm').style.color = pm > 37.5 ? '#ff4d4d' : '#00e676';
 
-            } catch (e) { console.error("Agro Data Error:", e); }
+                // แสดงพยากรณ์อากาศ 7 วัน
+                const fContainer = document.getElementById('forecast-container');
+                fContainer.innerHTML = '';
+                d.daily.time.forEach((date, i) => {
+                    const info = getWeatherInfo(d.daily.weathercode[i]);
+                    const day = new Date(date);
+                    const div = document.createElement('div');
+                    div.className = 'forecast-day';
+                    div.innerHTML = `<div style="font-size: 0.7rem; color: #8b949e;">${day.toLocaleDateString('th-TH',{weekday:'short'})}</div>
+                                     <div style="font-size: 0.6rem; color: #58a6ff;">${day.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit'})}</div>
+                                     <div class="weather-icon">${info.icon}</div>
+                                     <div class="weather-desc">${info.desc}</div>
+                                     <div style="font-size: 0.9rem; font-weight: bold; color: #ff9f43;">${d.daily.temperature_2m_max[i]}°</div>`;
+                    fContainer.appendChild(div);
+                });
+            } catch (e) { console.error("Data Load Error:", e); }
         }
 
         setInterval(() => { document.getElementById('clockDisplay').innerText = new Date().toLocaleTimeString('th-TH'); }, 1000);
