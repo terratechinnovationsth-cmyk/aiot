@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TerraTech Dashboard | Ultimate Agromet Edition</title>
+    <title>TerraTech Dashboard | Professional Agromet Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
@@ -108,11 +108,12 @@
             const sheetID = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
             const query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/' + sheetID + '/gviz/tq?tq=select A,B,C order by A desc limit ' + (days * 200));
             query.send(response => {
+                if (response.isError()) return;
                 const data = response.getDataTable();
                 if (data.getNumberOfRows() > 0) {
                     const t = data.getValue(0, 1); const h = data.getValue(0, 2);
-                    document.getElementById('t_val').innerHTML = t.toFixed(1) + '<span class="unit">°C</span>';
-                    document.getElementById('h_val').innerHTML = h.toFixed(1) + '<span class="unit">%</span>';
+                    document.getElementById('t_val').innerHTML = (t ? t.toFixed(1) : '--') + '<span class="unit">°C</span>';
+                    document.getElementById('h_val').innerHTML = (h ? h.toFixed(1) : '--') + '<span class="unit">%</span>';
                     document.getElementById('tempNeedle').style.transform = `translateX(-50%) rotate(${(t * 3) - 90}deg)`;
                     document.getElementById('humNeedle').style.transform = `translateX(-50%) rotate(${(h * 1.8) - 90}deg)`;
                     document.getElementById('last-data-time').innerText = 'Last Sync: ' + data.getFormattedValue(0, 0);
@@ -128,43 +129,59 @@
 
         async function getAgroData() {
             try {
-                // 1. ดึงข้อมูลพยากรณ์และเกษตร
-                const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=uv_index,shortwave_radiation,dew_point_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,et0_fao_evapotranspiration&hourly=soil_temperature_0_to_6cm,soil_moisture_0_to_1cm&timezone=Asia%2FBangkok`;
+                // แยกการดึงข้อมูลเพื่อความเสถียร
+                const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=uv_index,shortwave_radiation,dew_point_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,et0_fao_evapotranspiration&hourly=soil_temperature_0_to_6cm,soil_moisture_0_to_1cm&timezone=Asia%2FBangkok&forecast_days=7`;
                 const airUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=pm2_5`;
 
                 const [resF, resA] = await Promise.all([fetch(forecastUrl), fetch(airUrl)]);
                 const d = await resF.json();
                 const a = await resA.json();
 
-                // แสดงผล Agromet
-                document.getElementById('agro-et').innerHTML = d.daily.et0_fao_evapotranspiration[0].toFixed(2) + ' <span class="unit">mm</span>';
-                document.getElementById('agro-soil-t').innerHTML = d.hourly.soil_temperature_0_to_6cm[0].toFixed(1) + ' <span class="unit">°C</span>';
-                document.getElementById('agro-soil-m').innerHTML = d.hourly.soil_moisture_0_to_1cm[0].toFixed(3) + ' <span class="unit">m³/m³</span>';
-                document.getElementById('agro-solar').innerHTML = d.current.shortwave_radiation.toFixed(0) + ' <span class="unit">W/m²</span>';
-                document.getElementById('agro-dew').innerHTML = d.current.dew_point_2m.toFixed(1) + ' <span class="unit">°C</span>';
-                document.getElementById('agro-uv').innerText = d.current.uv_index.toFixed(1);
-                document.getElementById('agro-pm').innerText = a.current.pm2_5.toFixed(1) + ' µg';
-                document.getElementById('agro-pm').style.color = a.current.pm2_5 > 37.5 ? '#ff4d4d' : '#00e676';
+                // อัปเดตข้อมูล Agromet (ตรวจสอบการมีอยู่ของข้อมูลก่อนแสดงผล)
+                if (d.daily) {
+                    document.getElementById('agro-et').innerHTML = d.daily.et0_fao_evapotranspiration[0].toFixed(2) + ' <span class="unit">mm</span>';
+                    const gdd = ((d.daily.temperature_2m_max[0] + d.daily.temperature_2m_min[0]) / 2) - 10;
+                    document.getElementById('agro-gdd').innerHTML = Math.max(0, gdd).toFixed(1) + ' <span class="unit">°C/d</span>';
+                    
+                    // แสดงพยากรณ์ 7 วัน
+                    const fContainer = document.getElementById('forecast-container');
+                    fContainer.innerHTML = '';
+                    d.daily.time.forEach((date, i) => {
+                        const info = getWeatherInfo(d.daily.weathercode[i]);
+                        const day = new Date(date);
+                        const div = document.createElement('div');
+                        div.className = 'forecast-day';
+                        div.innerHTML = `<div style="font-size: 0.7rem; color: #8b949e;">${day.toLocaleDateString('th-TH',{weekday:'short'})}</div>
+                                         <div style="font-size: 0.6rem; color: #58a6ff;">${day.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit'})}</div>
+                                         <div class="weather-icon">${info.icon}</div>
+                                         <div class="weather-desc">${info.desc}</div>
+                                         <div style="font-size: 0.9rem; font-weight: bold; color: #ff9f43;">${d.daily.temperature_2m_max[i]}°</div>`;
+                        fContainer.appendChild(div);
+                    });
+                }
 
-                const gdd = ((d.daily.temperature_2m_max[0] + d.daily.temperature_2m_min[0]) / 2) - 10;
-                document.getElementById('agro-gdd').innerHTML = Math.max(0, gdd).toFixed(1) + ' <span class="unit">°C/d</span>';
+                if (d.current) {
+                    document.getElementById('agro-solar').innerHTML = d.current.shortwave_radiation.toFixed(0) + ' <span class="unit">W/m²</span>';
+                    document.getElementById('agro-dew').innerHTML = d.current.dew_point_2m.toFixed(1) + ' <span class="unit">°C</span>';
+                    document.getElementById('agro-uv').innerText = d.current.uv_index.toFixed(1);
+                }
 
-                // แสดงพยากรณ์อากาศ 7 วัน
-                const fContainer = document.getElementById('forecast-container');
-                fContainer.innerHTML = '';
-                d.daily.time.forEach((date, i) => {
-                    const info = getWeatherInfo(d.daily.weathercode[i]);
-                    const day = new Date(date);
-                    const div = document.createElement('div');
-                    div.className = 'forecast-day';
-                    div.innerHTML = `<div style="font-size: 0.7rem; color: #8b949e;">${day.toLocaleDateString('th-TH',{weekday:'short'})}</div>
-                                     <div style="font-size: 0.6rem; color: #58a6ff;">${day.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit'})}</div>
-                                     <div class="weather-icon">${info.icon}</div>
-                                     <div class="weather-desc">${info.desc}</div>
-                                     <div style="font-size: 0.9rem; font-weight: bold; color: #ff9f43;">${d.daily.temperature_2m_max[i]}°</div>`;
-                    fContainer.appendChild(div);
-                });
-            } catch (e) { console.error("Data Load Error:", e); }
+                if (d.hourly) {
+                    document.getElementById('agro-soil-t').innerHTML = d.hourly.soil_temperature_0_to_6cm[0].toFixed(1) + ' <span class="unit">°C</span>';
+                    document.getElementById('agro-soil-m').innerHTML = d.hourly.soil_moisture_0_to_1cm[0].toFixed(3) + ' <span class="unit">m³/m³</span>';
+                }
+
+                if (a.current) {
+                    const pm = a.current.pm2_5;
+                    document.getElementById('agro-pm').innerText = pm.toFixed(1) + ' µg';
+                    document.getElementById('agro-pm').style.color = pm > 37.5 ? '#ff4d4d' : '#00e676';
+                }
+
+            } catch (e) { 
+                console.error("Data Load Error:", e);
+                // แสดงข้อความแจ้งเตือนถ้าโหลดไม่ได้เลย
+                document.getElementById('agro-grid-content').innerHTML += '<div class="text-danger small">API Connection Error</div>';
+            }
         }
 
         setInterval(() => { document.getElementById('clockDisplay').innerText = new Date().toLocaleTimeString('th-TH'); }, 1000);
