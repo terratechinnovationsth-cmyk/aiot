@@ -37,7 +37,6 @@
         .weather-icon { font-size: 2.5rem; margin: 10px 0; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
         #line_chart, #sun_chart { width: 100%; height: 350px; }
         .main-footer { padding: 30px 0; text-align: center; color: #8b949e; border-top: 1px solid var(--border-color); margin-top: 40px; font-size: 0.8rem; }
-        .highlight-box { background: rgba(241, 196, 15, 0.05); border: 1px dashed #f1c40f; border-radius: 10px; padding: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -118,18 +117,14 @@
                 <div class="tech-card">
                     <div class="label-text"><span>Day/Night Cycle Analysis</span></div>
                     <div id="sun_chart"></div>
-                    
-                    <div class="highlight-box text-center">
-                        <div class="small fw-bold text-warning uppercase" style="letter-spacing: 1px;">ช่วงเวลาที่มีแสงแดดตั้งแต่ 12 ชั่วโมงเต็ม</div>
-                        <div class="h5 mt-1 mb-0 fw-bold" style="color: #fff;">14 มีนาคม — 29 กันยายน 2026</div>
-                        <div class="small text-secondary mt-1">วันที่แสงแดดเริ่มแตะ 12 ชม. จนถึงวันที่แสงเริ่มลดลงจาก 12 ชม.</div>
-                    </div>
-
                     <div class="row text-center mt-4">
                         <div class="col-md-3"><div class="small text-secondary">วันนี้ (15 มี.ค.)</div><div id="today-daylight" class="fw-bold">--</div></div>
                         <div class="col-md-3"><div class="small text-secondary">Sunrise</div><div id="today-sunrise" class="fw-bold text-warning">--</div></div>
                         <div class="col-md-3"><div class="small text-secondary">Sunset</div><div id="today-sunset" class="fw-bold text-info">--</div></div>
-                        <div class="col-md-3"><div class="small text-secondary">Next Equinox</div><div class="fw-bold text-success">20 มี.ค. 2026</div></div>
+                        <div class="col-md-3">
+                            <div class="small text-secondary">12 hours sunlight</div>
+                            <div class="fw-bold text-success" style="font-size: 0.9rem;">14 Mar — 29 Sep 2026</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -151,18 +146,16 @@
             data.addColumn('date', 'Date');
             data.addColumn('number', 'Daylight Hours');
             data.addColumn({type: 'string', role: 'tooltip'});
-            data.addColumn('number', 'Markers'); // Series สำหรับเส้นประแนวตั้ง
+            data.addColumn('number', 'Markers');
 
             const year = 2026;
-            const markerDates = [new Date(year, 2, 14), new Date(year, 8, 29)]; // 14 Mar, 29 Sep
-
             for (let d = new Date(year, 0, 1); d <= new Date(year, 11, 31); d.setDate(d.getDate() + 1)) {
                 const dateClone = new Date(d);
                 const times = SunCalc.getTimes(dateClone, LAT, LON);
                 const dur = (times.sunset - times.sunrise) / 3600000;
                 
-                // เช็คว่าเป็นวันที่ต้องปักหมุดเส้นแนวตั้งหรือไม่
                 let markerVal = null;
+                // เส้นประระบุจุด 14 Mar และ 29 Sep
                 if (dateClone.getMonth() === 2 && dateClone.getDate() === 14) markerVal = 24;
                 if (dateClone.getMonth() === 8 && dateClone.getDate() === 29) markerVal = 24;
 
@@ -173,7 +166,6 @@
                     markerVal
                 ]);
 
-                // Update Today Info (15 March)
                 if(dateClone.getMonth() === 2 && dateClone.getDate() === 15) {
                     document.getElementById('today-daylight').innerText = dur.toFixed(2) + " ชม.";
                     document.getElementById('today-sunrise').innerText = times.sunrise.getHours() + ":" + times.sunrise.getMinutes().toString().padStart(2,'0');
@@ -185,7 +177,7 @@
             chart.draw(data, {
                 backgroundColor: 'transparent',
                 series: {
-                    0: { type: 'area', color: '#58a6ff', areaOpacity: 0.15, lineWidth: 2 },
+                    0: { type: 'area', color: '#ff9f43', areaOpacity: 0.15, lineWidth: 3 }, // เส้นกราฟสีส้ม
                     1: { type: 'line', color: '#ffffff', lineWidth: 1, lineDashStyle: [4, 4], visibleInLegend: false, enableInteractivity: false }
                 },
                 legend: 'none',
@@ -200,7 +192,6 @@
             });
         }
 
-        // --- Standard Fetch Functions (คงเดิมตาม Master Code) ---
         function fetchSensorData() {
             const sheetID = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
             const query = new google.visualization.Query(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tq=select A,B,C order by A desc limit 100`);
