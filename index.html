@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TerraTech Dashboard | Dark Mode Edition</title>
+    <title>TerraTech Dashboard | Monitoring Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
@@ -12,6 +12,8 @@
             --card-bg: #161b22;
             --text-main: #e4e6eb;
             --border-color: #30363d;
+            --status-online: #2ecc71;
+            --status-offline: #e74c3c;
         }
 
         body { 
@@ -23,12 +25,24 @@
         }
 
         header {
-            padding: 30px 0;
+            padding: 20px 0;
             border-bottom: 1px solid var(--border-color);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .dashboard-title { font-weight: bold; color: #ffffff; }
+
+        /* Status Bar Style */
+        #connection-status {
+            font-size: 0.85rem;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .status-online { background: rgba(46, 204, 113, 0.1); color: var(--status-online); border: 1px solid var(--status-online); }
+        .status-offline { background: rgba(231, 76, 60, 0.1); color: var(--status-offline); border: 1px solid var(--status-offline); }
 
         .tech-card {
             background-color: var(--card-bg);
@@ -39,93 +53,25 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        .label-text {
-            color: #8b949e;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-        }
+        .label-text { color: #8b949e; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; display: flex; justify-content: space-between; margin-bottom: 10px; }
 
-        .gauge-wrapper {
-            position: relative;
-            width: 240px;
-            height: 120px;
-            margin: 0 auto;
-            overflow: hidden;
-        }
+        .gauge-wrapper { position: relative; width: 220px; height: 110px; margin: 0 auto; overflow: hidden; }
+        .gauge-bg { width: 220px; height: 220px; border-radius: 50%; background: #222; mask: radial-gradient(farthest-side, transparent 75%, white 76%); -webkit-mask: radial-gradient(farthest-side, transparent 75%, white 76%); }
+        .temp-gradient { background: conic-gradient(from -90deg, #2ecc71 0deg, #2ecc71 45deg, #f1c40f 45deg, #f1c40f 90deg, #e67e22 90deg, #e67e22 135deg, #e74c3c 135deg, #e74c3c 180deg); }
+        .hum-gradient { background: conic-gradient(from -90deg, #a5f3fc 0deg, #a5f3fc 45deg, #00d2ff 45deg, #00d2ff 90deg, #004e92 90deg, #004e92 135deg, #002147 135deg, #002147 180deg); }
 
-        .gauge-bg {
-            width: 240px;
-            height: 240px;
-            border-radius: 50%;
-            background: #222;
-            mask: radial-gradient(farthest-side, transparent 75%, white 76%);
-            -webkit-mask: radial-gradient(farthest-side, transparent 75%, white 76%);
-        }
+        .needle { position: absolute; bottom: 0; left: 50%; width: 3px; height: 90px; background: #ffffff; transform-origin: bottom center; transform: translateX(-50%) rotate(-90deg); transition: transform 2s cubic-bezier(0.17, 0.67, 0.83, 0.67); z-index: 10; border-radius: 10px; }
+        .needle-pivot { position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 12px; height: 12px; background: #ffffff; border-radius: 50%; z-index: 11; }
 
-        .temp-gradient {
-            background: conic-gradient(from -90deg, 
-                #2ecc71 0deg, #2ecc71 45deg,
-                #f1c40f 45deg, #f1c40f 90deg,
-                #e67e22 90deg, #e67e22 135deg,
-                #e74c3c 135deg, #e74c3c 180deg
-            );
-        }
+        .value-display { font-size: 2.2rem; font-weight: bold; color: #ffffff; margin-top: 5px; transition: color 0.5s; }
+        .value-stale { color: #484f58 !important; } /* สีเมื่อข้อมูลค้าง */
 
-        .hum-gradient {
-            background: conic-gradient(from -90deg, 
-                #a5f3fc 0deg, #a5f3fc 45deg,
-                #00d2ff 45deg, #00d2ff 90deg,
-                #004e92 90deg, #004e92 135deg,
-                #002147 135deg, #002147 180deg
-            );
-        }
+        .unit { font-size: 1rem; color: #8b949e; }
+        .minmax-text { font-size: 0.85rem; color: #8b949e; margin-top: 5px; }
+        .last-update { font-size: 0.75rem; color: #58a6ff; margin-top: 10px; }
 
-        .needle {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 4px;
-            height: 100px;
-            background: #ffffff;
-            transform-origin: bottom center;
-            transform: translateX(-50%) rotate(-90deg);
-            transition: transform 2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-            z-index: 10;
-            border-radius: 10px;
-        }
-
-        .needle-pivot {
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 16px;
-            height: 16px;
-            background: #ffffff;
-            border-radius: 50%;
-            z-index: 11;
-        }
-
-        .value-display {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #ffffff;
-            margin-top: 10px;
-        }
-
-        .unit { font-size: 1.1rem; color: #8b949e; }
-        .minmax-text { font-size: 0.9rem; color: #8b949e; margin-top: 5px; }
-
-        #line_chart { width: 100%; height: 400px; background: transparent; }
-
-        .btn-group-tech .btn { border-color: var(--border-color); color: #8b949e; }
-        .btn-group-tech .btn:hover, .btn-group-tech .btn.active-btn { background-color: #1f6feb; color: white; }
-        
-        .main-footer { padding: 20px 0; text-align: center; border-top: 1px solid var(--border-color); margin-top: 40px; color: #8b949e; font-size: 0.9rem; }
+        #line_chart { width: 100%; height: 350px; }
+        .main-footer { padding: 20px 0; text-align: center; border-top: 1px solid var(--border-color); margin-top: 40px; color: #8b949e; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -134,10 +80,11 @@
         <div class="container d-md-flex justify-content-between align-items-center text-md-start">
             <div>
                 <h1 class="h3 dashboard-title mb-1">TERRATECH INNOVATIONS</h1>
-                <p class="text-secondary mb-0">Agricultural Precision Gauges</p>
+                <div id="connection-status" class="status-online">● SYSTEM ONLINE</div>
             </div>
-            <div class="text-md-end mt-3 mt-md-0">
-                <h2 id="clockDisplay" class="h4 mb-0 text-light" style="font-weight: 300;">-</h2>
+            <div class="text-md-end mt-2 mt-md-0">
+                <h2 id="clockDisplay" class="h5 mb-0 text-light" style="font-weight: 300;">-</h2>
+                <div id="last-data-time" class="last-update">Waiting for data...</div>
             </div>
         </div>
     </header>
@@ -146,7 +93,7 @@
         <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <div class="tech-card text-center">
-                    <div class="label-text"><span>Temperature (0-60)</span><span>°C</span></div>
+                    <div class="label-text"><span>Temperature</span><span>°C</span></div>
                     <div class="gauge-wrapper">
                         <div class="gauge-bg temp-gradient"></div>
                         <div id="tempNeedle" class="needle"></div>
@@ -158,7 +105,7 @@
             </div>
             <div class="col-md-6">
                 <div class="tech-card text-center">
-                    <div class="label-text"><span>Humidity (0-100)</span><span>%</span></div>
+                    <div class="label-text"><span>Humidity</span><span>%</span></div>
                     <div class="gauge-wrapper">
                         <div class="gauge-bg hum-gradient"></div>
                         <div id="humNeedle" class="needle"></div>
@@ -173,22 +120,21 @@
         <div class="row">
             <div class="col-12">
                 <div class="tech-card">
-                    <div class="d-md-flex justify-content-between align-items-center mb-4">
+                    <div class="d-md-flex justify-content-between align-items-center mb-3">
                         <h3 class="h6 fw-bold text-uppercase m-0" style="color: #8b949e;">Historical Trend</h3>
-                        <div class="btn-group btn-group-tech mt-3 mt-md-0" role="group">
-                            <button type="button" class="btn btn-sm" onclick="drawChart(1)">1 Day</button>
-                            <button type="button" class="btn btn-sm" onclick="drawChart(7)">7 Days</button>
-                            <button type="button" class="btn btn-sm" onclick="drawChart(30)">1 Month</button>
+                        <div class="btn-group mt-2 mt-md-0">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="drawChart(1)">1D</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="drawChart(7)">7D</button>
                         </div>
                     </div>
-                    <div id="line_chart">กำลังดึงข้อมูล...</div>
+                    <div id="line_chart">Loading...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer class="main-footer no-print">
-        <div class="container"><p class="mb-0">© 2026 บริษัทเทอร่าเทค อินโนเวชั่นส์ จำกัด | ออกแบบและพัฒนาโดย <strong>Mr.BOOK</strong></p></div>
+    <footer class="main-footer">
+        <div class="container">© 2026 TerraTech Innovations Co., Ltd. | Developed by Mr.BOOK</div>
     </footer>
 
     <script>
@@ -200,77 +146,68 @@
             const query = new google.visualization.Query('https://docs.google.com/spreadsheets/d/' + sheetID + '/gviz/tq?tq=select A,B,C order by A desc limit ' + (days * 200));
             
             query.send(response => {
-                if (response.isError()) {
-                    document.getElementById('line_chart').innerHTML = "Error: " + response.getMessage();
-                    return;
-                }
+                if (response.isError()) return;
                 const data = response.getDataTable();
-                
                 if (data.getNumberOfRows() > 0) {
-                    let t = data.getValue(0, 1);
-                    let h = data.getValue(0, 2);
-                    
-                    document.getElementById('t_val').innerHTML = (typeof t === 'number' ? t.toFixed(1) : t) + '<span class="unit">°C</span>';
-                    document.getElementById('h_val').innerHTML = (typeof h === 'number' ? h.toFixed(1) : h) + '<span class="unit">%</span>';
+                    const lastUpdateStr = data.getFormattedValue(0, 0); // เวลาจาก Sheet
+                    const t = data.getValue(0, 1);
+                    const h = data.getValue(0, 2);
 
-                    let t_min = Infinity, t_max = -Infinity;
-                    let h_min = Infinity, h_max = -Infinity;
+                    // --- ตรวจสอบความสดของข้อมูล (Data Freshness) ---
+                    // ดึงเวลาปัจจุบัน และเวลาจากข้อมูลล่าสุดมาเทียบกัน (หน่วยมิลลิวินาที)
+                    const lastUpdateDate = new Date(data.getValue(0, 0));
+                    const now = new Date();
+                    const diffMinutes = Math.floor((now - lastUpdateDate) / (1000 * 60));
 
-                    for (let i = 0; i < data.getNumberOfRows(); i++) {
-                        let tv = data.getValue(i, 1);
-                        let hv = data.getValue(i, 2);
-                        if (typeof tv === 'number') {
-                            if (tv < t_min) t_min = tv;
-                            if (tv > t_max) t_max = tv;
-                        }
-                        if (typeof hv === 'number') {
-                            if (hv < h_min) h_min = hv;
-                            if (hv > h_max) h_max = hv;
-                        }
+                    const statusEl = document.getElementById('connection-status');
+                    const tValEl = document.getElementById('t_val');
+                    const hValEl = document.getElementById('h_val');
+
+                    if (diffMinutes > 5) { // หากข้อมูลเก่าเกิน 5 นาที
+                        statusEl.innerText = '● SYSTEM OFFLINE (STALE DATA)';
+                        statusEl.className = 'status-offline';
+                        tValEl.classList.add('value-stale');
+                        hValEl.classList.add('value-stale');
+                    } else {
+                        statusEl.innerText = '● SYSTEM ONLINE';
+                        statusEl.className = 'status-online';
+                        tValEl.classList.remove('value-stale');
+                        hValEl.classList.remove('value-stale');
                     }
 
-                    document.getElementById('t_minmax').innerText = 'Min: ' + (t_min === Infinity ? '--' : t_min.toFixed(1)) + '°C | Max: ' + (t_max === -Infinity ? '--' : t_max.toFixed(1)) + '°C';
-                    document.getElementById('h_minmax').innerText = 'Min: ' + (h_min === Infinity ? '--' : h_min.toFixed(1)) + '% | Max: ' + (h_max === -Infinity ? '--' : h_max.toFixed(1)) + '%';
-                    
-                    let tMapped = (t * 3) - 90; 
-                    if (tMapped > 90) tMapped = 90;
-                    if (tMapped < -90) tMapped = -90;
+                    document.getElementById('last-data-time').innerText = 'Last Data Received: ' + lastUpdateStr;
+                    tValEl.innerHTML = t.toFixed(1) + '<span class="unit">°C</span>';
+                    hValEl.innerHTML = h.toFixed(1) + '<span class="unit">%</span>';
 
-                    let hMapped = (h * 1.8) - 90;
-                    if (hMapped > 90) hMapped = 90;
-                    if (hMapped < -90) hMapped = -90;
+                    // --- คำนวณ Min-Max และเข็ม (เหมือนเดิม) ---
+                    let t_min = Infinity, t_max = -Infinity, h_min = Infinity, h_max = -Infinity;
+                    for (let i = 0; i < data.getNumberOfRows(); i++) {
+                        let tv = data.getValue(i, 1), hv = data.getValue(i, 2);
+                        if (typeof tv === 'number') { t_min = Math.min(t_min, tv); t_max = Math.max(t_max, tv); }
+                        if (typeof hv === 'number') { h_min = Math.min(h_min, hv); h_max = Math.max(h_max, hv); }
+                    }
+                    document.getElementById('t_minmax').innerText = `Min: ${t_min.toFixed(1)}°C | Max: ${t_max.toFixed(1)}°C`;
+                    document.getElementById('h_minmax').innerText = `Min: ${h_min.toFixed(1)}% | Max: ${h_max.toFixed(1)}%`;
                     
-                    document.getElementById('tempNeedle').style.transform = 'translateX(-50%) rotate(' + tMapped + 'deg)';
-                    document.getElementById('humNeedle').style.transform = 'translateX(-50%) rotate(' + hMapped + 'deg)';
+                    let tDeg = (t * 3) - 90;
+                    let hDeg = (h * 1.8) - 90;
+                    document.getElementById('tempNeedle').style.transform = `translateX(-50%) rotate(${Math.min(90, Math.max(-90, tDeg))}deg)`;
+                    document.getElementById('humNeedle').style.transform = `translateX(-50%) rotate(${Math.min(90, Math.max(-90, hDeg))}deg)`;
                 }
 
                 const view = new google.visualization.DataView(data);
                 view.setRows(data.getSortedRows([{column: 0, asc: true}]));
-                
-                const options = {
-                    curveType: 'function',
-                    legend: { position: 'bottom', textStyle: { color: '#8b949e' } },
-                    colors: ['#ff9f43', '#00d2ff'],
-                    backgroundColor: 'transparent',
-                    hAxis: { textStyle: { color: '#8b949e' }, gridlines: { color: '#30363d' } },
-                    vAxis: { textStyle: { color: '#8b949e' }, gridlines: { color: '#30363d' }, viewWindow: { min: 0 } },
-                    chartArea: { width: '90%', height: '70%' },
-                    interpolateNulls: true
-                };
-
                 const chart = new google.visualization.LineChart(document.getElementById('line_chart'));
-                chart.draw(view, options);
+                chart.draw(view, { curveType: 'function', legend: 'bottom', colors: ['#ff9f43', '#00d2ff'], backgroundColor: 'transparent', hAxis: {textStyle:{color:'#8b949e'}}, vAxis: {textStyle:{color:'#8b949e'}} });
             });
         }
 
         function updateClock() {
             const now = new Date();
-            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            document.getElementById('clockDisplay').innerText = days[now.getDay()] + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clockDisplay').innerText = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }
         setInterval(updateClock, 1000);
-        updateClock();
-        setInterval(() => drawChart(1), 60000);
+        setInterval(() => drawChart(1), 30000); // อัปเดตทุก 30 วินาที
     </script>
 </body>
 </html>
