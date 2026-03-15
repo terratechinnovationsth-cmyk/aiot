@@ -3,61 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TerraTech Dashboard | Professional Agromet Edition</title>
+    <title>TerraTech Dashboard | Daylight Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
     <style>
         :root {
-            --bg-dark: #0b0e11;
-            --card-bg: #161b22;
-            --text-main: #e4e6eb;
-            --border-color: #30363d;
-            --status-online: #2ecc71;
-            --status-offline: #e74c3c;
-            --accent-blue: #58a6ff;
-            --accent-orange: #ff9f43;
+            --bg-dark: #0b0e11; --card-bg: #161b22; --text-main: #e4e6eb; --border-color: #30363d;
+            --status-online: #2ecc71; --accent-blue: #58a6ff; --accent-orange: #ff9f43;
         }
-
-        body { 
-            background-color: var(--bg-dark); color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0; padding-bottom: 50px;
-        }
-
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding-bottom: 50px; }
         header { padding: 20px 0; border-bottom: 1px solid var(--border-color); background: rgba(22, 27, 34, 0.9); }
-        
-        .section-header { 
-            display: flex; align-items: center; justify-content: space-between;
-            margin: 30px 0 15px 0; padding-left: 12px; border-left: 4px solid var(--accent-blue);
-        }
-        
-        .section-title { font-size: 1.1rem; font-weight: bold; text-transform: uppercase; color: #ffffff; margin-bottom: 0; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin: 30px 0 15px 0; padding-left: 12px; border-left: 4px solid var(--accent-blue); }
+        .section-title { font-size: 1.1rem; font-weight: bold; text-transform: uppercase; color: #ffffff; }
         .tech-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; height: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .label-text { color: #8b949e; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; display: flex; justify-content: space-between; margin-bottom: 15px; }
-
-        #conn-status { font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
-        .status-online { background: rgba(46, 204, 113, 0.1); color: var(--status-online); border: 1px solid var(--status-online); }
-        .status-offline { background: rgba(231, 76, 60, 0.1); color: var(--status-offline); border: 1px solid var(--status-offline); }
-
         .gauge-wrapper { position: relative; width: 200px; height: 100px; margin: 0 auto; overflow: hidden; }
         .gauge-bg { width: 200px; height: 200px; border-radius: 50%; background: #222; mask: radial-gradient(farthest-side, transparent 75%, white 76%); -webkit-mask: radial-gradient(farthest-side, transparent 75%, white 76%); }
         .temp-gradient { background: conic-gradient(from -90deg, #2ecc71 0deg, #2ecc71 45deg, #f1c40f 45deg, #f1c40f 90deg, #e67e22 90deg, #e67e22 135deg, #e74c3c 135deg, #e74c3c 180deg); }
         .hum-gradient { background: conic-gradient(from -90deg, #a5f3fc 0deg, #a5f3fc 45deg, #00d2ff 45deg, #00d2ff 90deg, #004e92 90deg, #004e92 135deg, #002147 135deg, #002147 180deg); }
         .needle { position: absolute; bottom: 0; left: 50%; width: 3px; height: 85px; background: #ffffff; transform-origin: bottom center; transition: transform 2s; z-index: 10; border-radius: 10px; }
-        
-        .value-display { font-size: 2.5rem; font-weight: bold; color: #ffffff; margin-top: 10px; }
-        .value-stale { color: #484f58 !important; }
-
+        .value-display { font-size: 2.5rem; font-weight: bold; color: #ffffff; }
         .agromet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
         .agro-item { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; text-align: center; }
         .agro-label { font-size: 0.75rem; color: #8b949e; margin-bottom: 5px; font-weight: bold; }
         .agro-val { font-size: 1.3rem; font-weight: 700; color: var(--accent-blue); }
-
         .forecast-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
         .forecast-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px 5px; text-align: center; }
-        /* Weather Icon Enlarged */
-        .weather-icon { font-size: 2.5rem; margin: 10px 0; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
-
+        .weather-icon { font-size: 2.5rem; margin: 10px 0; }
         #line_chart { width: 100%; height: 350px; }
         .main-footer { padding: 30px 0; text-align: center; color: #8b949e; border-top: 1px solid var(--border-color); margin-top: 40px; font-size: 0.8rem; }
     </style>
@@ -68,30 +41,22 @@
         <div class="container d-md-flex justify-content-between align-items-center">
             <div>
                 <h1 class="h3 mb-0 fw-bold">TERRATECH INNOVATIONS</h1>
-                <p class="text-secondary mb-0 small">Agricultural Intelligence Dashboard</p>
+                <p class="text-secondary mb-0 small">Daylight & Agricultural Intelligence</p>
             </div>
-            <div class="text-md-end mt-2 mt-md-0">
-                <div id="clockDisplay" class="fw-bold" style="font-size: 1.2rem;">-</div>
-                <div id="last-sync" class="text-info small" style="font-size: 0.7rem;">Syncing...</div>
-            </div>
+            <div id="clockDisplay" class="fw-bold" style="font-size: 1.2rem;">-</div>
         </div>
     </header>
 
     <div class="container mt-2">
-        
         <div class="section-header">
-            <h2 class="section-title">Section 1: Farm Monitoring (Sensors)</h2>
-            <span id="conn-status" class="status-online">● SYSTEM ONLINE</span>
+            <h2 class="section-title">Section 1: Farm Monitoring</h2>
+            <span id="conn-status" class="badge rounded-pill bg-success">● SYSTEM ONLINE</span>
         </div>
-
         <div class="row g-4">
             <div class="col-md-6">
                 <div class="tech-card text-center">
                     <div class="label-text"><span>Temperature</span><span>°C</span></div>
-                    <div class="gauge-wrapper">
-                        <div class="gauge-bg temp-gradient"></div>
-                        <div id="tempNeedle" class="needle" style="transform: translateX(-50%) rotate(-90deg);"></div>
-                    </div>
+                    <div class="gauge-wrapper"><div class="gauge-bg temp-gradient"></div><div id="tempNeedle" class="needle" style="transform: translateX(-50%) rotate(-90deg);"></div></div>
                     <div class="value-display" id="t_val">--</div>
                     <div class="text-secondary small mt-1" id="t_minmax">Min: -- | Max: --</div>
                 </div>
@@ -99,49 +64,33 @@
             <div class="col-md-6">
                 <div class="tech-card text-center">
                     <div class="label-text"><span>Humidity</span><span>%</span></div>
-                    <div class="gauge-wrapper">
-                        <div class="gauge-bg hum-gradient"></div>
-                        <div id="humNeedle" class="needle" style="transform: translateX(-50%) rotate(-90deg);"></div>
-                    </div>
+                    <div class="gauge-wrapper"><div class="gauge-bg hum-gradient"></div><div id="humNeedle" class="needle" style="transform: translateX(-50%) rotate(-90deg);"></div></div>
                     <div class="value-display" id="h_val">--</div>
                     <div class="text-secondary small mt-1" id="h_minmax">Min: -- | Max: --</div>
                 </div>
             </div>
-            <div class="col-12 mt-4">
-                <div class="tech-card">
-                    <div class="label-text"><span>Historical Trend (Last 100 Data Points)</span></div>
-                    <div id="line_chart"></div>
-                </div>
-            </div>
+            <div class="col-12 mt-4"><div class="tech-card"><div id="line_chart"></div></div></div>
         </div>
 
         <div class="section-header" style="border-left-color: var(--accent-orange);">
             <h2 class="section-title">Section 2: 7-Day Weather Forecast</h2>
         </div>
-        <div class="row">
-            <div class="col-12">
-                <div class="tech-card">
-                    <div class="forecast-grid" id="forecast-box">
-                        <div class="w-100 text-center py-4">Fetching Forecast Data...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="row"><div class="col-12"><div class="tech-card"><div class="forecast-grid" id="forecast-box"></div></div></div></div>
 
-        <div class="section-header" style="border-left-color: var(--accent-blue);">
-            <h2 class="section-title">Section 3: Agrometeorology อ.เมือง จ.เชียงใหม่</h2>
+        <div class="section-header" style="border-left-color: #f1c40f;">
+            <h2 class="section-title">Section 3: Agrometeorology & Daylight Analysis</h2>
         </div>
-        <div class="row g-3 mb-4">
+        <div class="row g-3">
             <div class="col-12">
                 <div class="tech-card">
                     <div class="agromet-grid">
+                        <div class="agro-item"><div class="agro-label">Daylight ความยาวแสง</div><div class="agro-val" id="sun-duration" style="color: #f1c40f;">--</div></div>
+                        <div class="agro-item"><div class="agro-label">อาทิตย์ขึ้น-ตก</div><div class="agro-val" id="sun-times" style="font-size: 0.95rem;">--</div></div>
+                        <div class="agro-item"><div class="agro-label">Equinox (12 ชม.)</div><div class="agro-val" id="equinox-info" style="font-size: 0.95rem;">--</div></div>
                         <div class="agro-item"><div class="agro-label">การคายระเหยน้ำ (ET)</div><div class="agro-val" id="agro-et">--</div></div>
                         <div class="agro-item"><div class="agro-label">อุณหภูมิดิน (0-7cm)</div><div class="agro-val" id="agro-soil-t">--</div></div>
                         <div class="agro-item"><div class="agro-label">ความชื้นในดิน</div><div class="agro-val" id="agro-soil-m">--</div></div>
                         <div class="agro-item"><div class="agro-label">ความเข้มแสง (Solar)</div><div class="agro-val" id="agro-solar">--</div></div>
-                        <div class="agro-item"><div class="agro-label">สะสมความร้อน (GDD)</div><div class="agro-val" id="agro-gdd">--</div></div>
-                        <div class="agro-item"><div class="agro-label">จุดน้ำค้าง (Dew Point)</div><div class="agro-val" id="agro-dew">--</div></div>
-                        <div class="agro-item"><div class="agro-label">ดัชนี UV</div><div class="agro-val" id="agro-uv">--</div></div>
                         <div class="agro-item"><div class="agro-label">ค่าฝุ่น PM 2.5</div><div class="agro-val" id="agro-pm">--</div></div>
                     </div>
                 </div>
@@ -149,13 +98,11 @@
         </div>
     </div>
 
-    <footer class="main-footer">© 2026 TerraTech Innovations | พิกัด ต.สันผีเสื้อ อ.เมือง จ.เชียงใหม่ (18.87, 98.98)</footer>
+    <footer class="main-footer">© 2026 TerraTech Innovations | พิกัด ต.สันผีเสื้อ อ.เมือง จ.เชียงใหม่</footer>
 
     <script>
         google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(() => {
-            fetchSensorData(); fetchRoute1_WeatherAgro(); fetchRoute2_SoilDetails(); fetchRoute3_AirQuality();
-        });
+        google.charts.setOnLoadCallback(() => { fetchSensorData(); fetchAgroAll(); });
 
         const LAT = 18.87; const LON = 98.98;
 
@@ -163,104 +110,66 @@
             const sheetID = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
             const query = new google.visualization.Query(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tq=select A,B,C order by A desc limit 100`);
             query.send(res => {
-                if (res.isError()) return;
                 const data = res.getDataTable();
-                if (data.getNumberOfRows() > 0) {
-                    const t = data.getValue(0, 1);
-                    const h = data.getValue(0, 2);
-                    const lastDate = new Date(data.getValue(0, 0));
-                    const now = new Date();
-                    const diff = Math.floor((now - lastDate) / (1000 * 60));
-
-                    const statusEl = document.getElementById('conn-status');
-                    const tValEl = document.getElementById('t_val');
-                    const hValEl = document.getElementById('h_val');
-
-                    if (diff > 5) {
-                        statusEl.innerText = "● SYSTEM OFFLINE"; statusEl.className = "status-offline";
-                        tValEl.classList.add('value-stale'); hValEl.classList.add('value-stale');
-                    } else {
-                        statusEl.innerText = "● SYSTEM ONLINE"; statusEl.className = "status-online";
-                        tValEl.classList.remove('value-stale'); hValEl.classList.remove('value-stale');
-                    }
-
-                    tValEl.innerHTML = `${t.toFixed(1)}<span class="unit">°C</span>`;
-                    hValEl.innerHTML = `${h.toFixed(1)}<span class="unit">%</span>`;
+                if (data && data.getNumberOfRows() > 0) {
+                    const t = data.getValue(0, 1); const h = data.getValue(0, 2);
+                    document.getElementById('t_val').innerHTML = `${t.toFixed(1)}°C`;
+                    document.getElementById('h_val').innerHTML = `${h.toFixed(1)}%`;
                     document.getElementById('tempNeedle').style.transform = `translateX(-50%) rotate(${(t * 3) - 90}deg)`;
                     document.getElementById('humNeedle').style.transform = `translateX(-50%) rotate(${(h * 1.8) - 90}deg)`;
-                    document.getElementById('last-sync').innerText = `Last Sync: ${data.getFormattedValue(0,0)}`;
-                    
-                    let t_min = 100, t_max = -100, h_min = 100, h_max = -100;
-                    for(let i=0; i<data.getNumberOfRows(); i++) {
-                        let tv = data.getValue(i,1), hv = data.getValue(i,2);
-                        if(tv < t_min) t_min = tv; if(tv > t_max) t_max = tv;
-                        if(hv < h_min) h_min = hv; if(hv > h_max) h_max = hv;
-                    }
-                    document.getElementById('t_minmax').innerText = `Min: ${t_min.toFixed(1)} | Max: ${t_max.toFixed(1)}`;
-                    document.getElementById('h_minmax').innerText = `Min: ${h_min.toFixed(1)} | Max: ${h_max.toFixed(1)}`;
+                    new google.visualization.LineChart(document.getElementById('line_chart')).draw(data, {
+                        legend: 'bottom', colors: ['#ff9f43', '#00d2ff'], backgroundColor: 'transparent',
+                        hAxis: {textStyle: {color: '#8b949e', fontSize: 10}}, vAxis: {textStyle: {color: '#8b949e'}}
+                    });
                 }
-                new google.visualization.LineChart(document.getElementById('line_chart')).draw(data, {
-                    legend: 'bottom', colors: ['#ff9f43', '#00d2ff'], backgroundColor: 'transparent',
-                    chartArea: {width: '90%', height: '70%'},
-                    hAxis: {textStyle: {color: '#8b949e', fontSize: 10}, gridlines: {color: '#30363d'}},
-                    vAxis: {textStyle: {color: '#8b949e'}, gridlines: {color: '#30363d'}}
-                });
             });
         }
 
-        async function fetchRoute1_WeatherAgro() {
+        async function fetchAgroAll() {
             try {
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=uv_index,shortwave_radiation,dew_point_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,et0_fao_evapotranspiration&timezone=Asia%2FBangkok`);
+                // Agromet & Forecast
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=uv_index,shortwave_radiation,dew_point_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,et0_fao_evapotranspiration&hourly=soil_temperature_0_to_7cm,soil_moisture_0_to_7cm&timezone=Asia%2FBangkok`);
                 const d = await res.json();
                 
-                document.getElementById('agro-et').innerText = d.daily.et0_fao_evapotranspiration[0].toFixed(2) + " mm";
-                document.getElementById('agro-solar').innerText = d.current.shortwave_radiation.toFixed(0) + " W/m²";
-                document.getElementById('agro-dew').innerText = d.current.dew_point_2m.toFixed(1) + " °C";
-                document.getElementById('agro-uv').innerText = d.current.uv_index.toFixed(1);
-                const gdd = ((d.daily.temperature_2m_max[0] + d.daily.temperature_2m_min[0]) / 2) - 10;
-                document.getElementById('agro-gdd').innerText = Math.max(0, gdd).toFixed(1) + " °C/d";
+                // Air Quality
+                const resA = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=pm2_5`);
+                const a = await resA.json();
 
+                // Update UI
+                document.getElementById('agro-et').innerText = d.daily.et0_fao_evapotranspiration[0].toFixed(2) + " mm";
+                document.getElementById('agro-soil-t').innerText = d.hourly.soil_temperature_0_to_7cm[0].toFixed(1) + " °C";
+                document.getElementById('agro-soil-m').innerText = d.hourly.soil_moisture_0_to_7cm[0].toFixed(3);
+                document.getElementById('agro-solar').innerText = d.current.shortwave_radiation.toFixed(0) + " W/m²";
+                document.getElementById('agro-pm').innerText = a.current.pm2_5.toFixed(1) + " µg";
+
+                // Daylight Calculation (SunCalc)
+                const times = SunCalc.getTimes(new Date(), LAT, LON);
+                const sunDur = (times.sunset - times.sunrise) / (1000 * 60 * 60);
+                document.getElementById('sun-duration').innerText = sunDur.toFixed(2) + " ชม.";
+                document.getElementById('sun-times').innerText = `🌅 ${times.sunrise.getHours()}:${times.sunrise.getMinutes().toString().padStart(2,'0')} | 🌇 ${times.sunset.getHours()}:${times.sunset.getMinutes().toString().padStart(2,'0')}`;
+                
+                // Equinox Info
+                const now = new Date();
+                const target = now.getMonth() < 3 || now.getMonth() > 8 ? "20 มี.ค. (Equinox)" : "23 ก.ย. (Equinox)";
+                document.getElementById('equinox-info').innerText = target;
+
+                // Forecast
                 const box = document.getElementById('forecast-box'); box.innerHTML = '';
-                const map = { 0: ['☀️','แจ่มใส'], 1: ['🌤️','มีเมฆ'], 2: ['🌤️','มีเมฆ'], 3: ['☁️','ครึ้ม'], 45: ['🌫️','หมอก'], 51: ['🌧️','ฝนตก'], 61: ['🌧️','ฝนตก'], 80: ['🌦️','ฝนไล่'], 95: ['⛈️','พายุ'] };
+                const map = { 0: ['☀️','แจ่มใส'], 3: ['☁️','ครึ้ม'], 61: ['🌧️','ฝนตก'] };
                 d.daily.time.forEach((date, i) => {
-                    const day = new Date(date); const info = map[d.daily.weathercode[i]] || ['☁️', 'เมฆมาก'];
+                    const day = new Date(date);
                     box.innerHTML += `<div class="forecast-card">
                         <div class="small fw-bold">${day.toLocaleDateString('th-TH',{weekday:'short'})}</div>
-                        <div class="text-info" style="font-size:0.65rem">${day.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit'})}</div>
-                        <div class="weather-icon">${info[0]}</div>
-                        <div class="small text-secondary" style="font-size:0.6rem">${info[1]}</div>
-                        <div class="mt-2 fw-bold" style="color:var(--accent-orange); font-size: 0.9rem;">H: ${d.daily.temperature_2m_max[i]}°</div>
-                        <div class="fw-bold" style="color:var(--accent-blue); font-size: 0.8rem;">L: ${d.daily.temperature_2m_min[i]}°</div>
+                        <div class="weather-icon">${(map[d.daily.weathercode[i]] || ['🌤️'])[0]}</div>
+                        <div class="fw-bold" style="color:var(--accent-orange)">${d.daily.temperature_2m_max[i]}°</div>
+                        <div class="fw-bold" style="color:var(--accent-blue)">${d.daily.temperature_2m_min[i]}°</div>
                     </div>`;
                 });
-            } catch (e) { console.error("Route 1 Error"); }
-        }
-
-        async function fetchRoute2_SoilDetails() {
-            try {
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&hourly=soil_temperature_0_to_7cm,soil_moisture_0_to_7cm&timezone=Asia%2FBangkok`);
-                const d = await res.json();
-                const nowHour = new Date().getHours();
-                const soilTemp = d.hourly.soil_temperature_0_to_7cm[nowHour] || d.hourly.soil_temperature_0_to_7cm[0];
-                const soilMoist = d.hourly.soil_moisture_0_to_7cm[nowHour] || d.hourly.soil_moisture_0_to_7cm[0];
-                document.getElementById('agro-soil-t').innerText = soilTemp.toFixed(1) + " °C";
-                document.getElementById('agro-soil-m').innerText = soilMoist.toFixed(3) + " m³/m³";
-            } catch (e) { console.error("Route 2 Error"); }
-        }
-
-        async function fetchRoute3_AirQuality() {
-            try {
-                const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=pm2_5`);
-                const d = await res.json();
-                const pm = d.current.pm2_5;
-                const el = document.getElementById('agro-pm');
-                el.innerText = pm.toFixed(1) + " µg/m³";
-                el.style.color = pm > 37.5 ? '#ff4d4d' : '#00e676';
-            } catch (e) { console.error("Route 3 Error"); }
+            } catch (e) { console.error(e); }
         }
 
         setInterval(() => { document.getElementById('clockDisplay').innerText = new Date().toLocaleTimeString('th-TH'); }, 1000);
-        setInterval(() => { fetchSensorData(); fetchRoute1_WeatherAgro(); fetchRoute2_SoilDetails(); fetchRoute3_AirQuality(); }, 60000);
+        setInterval(() => { fetchSensorData(); fetchAgroAll(); }, 60000);
     </script>
 </body>
 </html>
