@@ -73,8 +73,9 @@
         
         /* Forecast Styles */
         #forecast-container { gap: 10px; padding-top: 10px; }
-        .forecast-day { min-width: 85px; padding: 12px 5px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid var(--border-color); }
-        .weather-icon { font-size: 1.5rem; margin: 5px 0; }
+        .forecast-day { min-width: 90px; padding: 12px 5px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid var(--border-color); }
+        .weather-icon { font-size: 1.5rem; margin: 3px 0; }
+        .forecast-date { font-size: 0.65rem; color: #58a6ff; margin-top: -2px; margin-bottom: 5px; }
 
         .main-footer { padding: 20px 0; text-align: center; border-top: 1px solid var(--border-color); margin-top: 40px; color: #8b949e; font-size: 0.85rem; }
     </style>
@@ -141,7 +142,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="tech-card">
-                    <h3 class="h6 fw-bold text-uppercase mb-4" style="color: #8b949e;">7-Day Weather Forecast (Chiang Mai Area)</h3>
+                    <h3 class="h6 fw-bold text-uppercase mb-4" style="color: #8b949e;">7-Day Weather Forecast (Lamphun Area)</h3>
                     <div id="forecast-container" class="d-flex justify-content-between text-center overflow-auto pb-2">
                         <div class="text-secondary w-100">Fetching forecast data...</div>
                     </div>
@@ -217,21 +218,19 @@
             });
         }
 
-        // ฟังก์ชันแปลง weathercode เป็น Emoji
         function getWeatherIcon(code) {
-            if (code === 0) return '☀️'; // ท้องฟ้าแจ่มใส
-            if (code >= 1 && code <= 3) return '🌤️'; // เมฆบางส่วน
-            if (code >= 45 && code <= 48) return '🌫️'; // หมอก
-            if (code >= 51 && code <= 67) return '🌧️'; // ฝนตก/ฝนละออง
-            if (code >= 71 && code <= 77) return '❄️'; // หิมะ (ถ้ามี)
-            if (code >= 80 && code <= 82) return '🌦️'; // ฝนไล่ช้าง
-            if (code >= 95 && code <= 99) return '⛈️'; // พายุฝนฟ้าคะนอง
-            return '☁️'; // เมฆมาก/อื่นๆ
+            if (code === 0) return '☀️'; 
+            if (code >= 1 && code <= 3) return '🌤️'; 
+            if (code >= 45 && code <= 48) return '🌫️'; 
+            if (code >= 51 && code <= 67) return '🌧️'; 
+            if (code >= 80 && code <= 82) return '🌦️'; 
+            if (code >= 95 && code <= 99) return '⛈️'; 
+            return '☁️'; 
         }
 
         async function getForecast() {
             try {
-                const lat = 18.87; 
+                const lat = 18.49; 
                 const lon = 98.98;
                 const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Asia%2FBangkok`;
 
@@ -240,13 +239,17 @@
                 const container = document.getElementById('forecast-container');
                 container.innerHTML = '';
 
-                data.daily.time.forEach((date, i) => {
-                    const dayName = new Date(date).toLocaleDateString('th-TH', { weekday: 'short' });
+                data.daily.time.forEach((dateStr, i) => {
+                    const dateObj = new Date(dateStr);
+                    const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'short' });
+                    const dateShort = dateObj.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit' });
                     const icon = getWeatherIcon(data.daily.weathercode[i]);
+                    
                     const div = document.createElement('div');
                     div.className = 'forecast-day';
                     div.innerHTML = `
-                        <div style="font-size: 0.75rem; color: #8b949e;">${dayName}</div>
+                        <div style="font-size: 0.75rem; color: #8b949e; font-weight: bold;">${dayName}</div>
+                        <div class="forecast-date">${dateShort}</div>
                         <div class="weather-icon">${icon}</div>
                         <div style="font-size: 1.1rem; font-weight: bold; color: #ff9f43; margin: 3px 0;">${data.daily.temperature_2m_max[i]}°</div>
                         <div style="font-size: 0.8rem; color: #58a6ff;">${data.daily.temperature_2m_min[i]}°</div>
