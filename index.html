@@ -64,7 +64,7 @@
                     <div class="label-text"><span>Temperature</span><span>°C</span></div>
                     <div class="gauge-wrapper">
                         <div class="gauge-bg temp-gradient"></div>
-                        <div id="tempNeedle" class="needle" style="transform: translateX(-50%) rotate(-90deg);"></div>
+                        <div id="tempNeedle" class="needle" style="transform: translateX(-50%) rotate(${(t * 3) - 90}deg);"></div>
                     </div>
                     <div class="value-display" id="t_val">--</div>
                     <div class="text-secondary small mt-1" id="t_minmax">Min: -- | Max: --</div>
@@ -75,7 +75,7 @@
                     <div class="label-text"><span>Humidity</span><span>%</span></div>
                     <div class="gauge-wrapper">
                         <div class="gauge-bg hum-gradient"></div>
-                        <div id="humNeedle" class="needle" style="transform: translateX(-50%) rotate(-90deg);"></div>
+                        <div id="humNeedle" class="needle" style="transform: translateX(-50%) rotate(${(h * 1.8) - 90}deg);"></div>
                     </div>
                     <div class="value-display" id="h_val">--</div>
                     <div class="text-secondary small mt-1" id="h_minmax">Min: -- | Max: --</div>
@@ -110,7 +110,7 @@
         </div>
 
         <div class="section-header" style="border-left-color: #f1c40f;">
-            <h2 class="section-title">Section 4: 2026 Sun Graph for Chiang Mai</h2>
+            <h2 class="section-title">Section 4: Photoperiodic Graphs 2026: Chiangmai</h2>
         </div>
         <div class="row mb-4">
             <div class="col-12">
@@ -118,13 +118,13 @@
                     <div class="label-text"><span>Day/Night Cycle Analysis</span></div>
                     <div id="sun_chart"></div>
                     <div class="row text-center mt-4">
-                        <div class="col-md-3"><div class="small text-secondary">วันนี้ (15 มี.ค.)</div><div id="today-daylight" class="fw-bold">--</div></div>
-                        <div class="col-md-3"><div class="small text-secondary">Sunrise</div><div id="today-sunrise" class="fw-bold text-warning">--</div></div>
-                        <div class="col-md-3"><div class="small text-secondary">Sunset</div><div id="today-sunset" class="fw-bold text-info">--</div></div>
                         <div class="col-md-3">
                             <div class="small text-secondary">12 hours sunlight</div>
                             <div class="fw-bold text-success" style="font-size: 0.9rem;">14 Mar — 29 Sep 2026</div>
                         </div>
+                        <div class="col-md-3"><div class="small text-secondary">วันนี้ (15 มี.ค.)</div><div id="today-daylight" class="fw-bold">--</div></div>
+                        <div class="col-md-3"><div class="small text-secondary">Sunrise</div><div id="today-sunrise" class="fw-bold text-warning">--</div></div>
+                        <div class="col-md-3"><div class="small text-secondary">Sunset</div><div id="today-sunset" class="fw-bold text-info">--</div></div>
                     </div>
                 </div>
             </div>
@@ -146,8 +146,8 @@
             data.addColumn('date', 'Date');
             data.addColumn('number', 'Daylight Hours');
             data.addColumn({type: 'string', role: 'tooltip'});
-            data.addColumn('number', 'Vertical Line Start'); // เส้นประเริ่มต้น
-            data.addColumn('number', 'Vertical Line End');   // เส้นประจุดจบ
+            data.addColumn('number', 'Vertical Line Start');
+            data.addColumn('number', 'Vertical Line End');
 
             const year = 2026;
             for (let d = new Date(year, 0, 1); d <= new Date(year, 11, 31); d.setDate(d.getDate() + 1)) {
@@ -155,19 +155,14 @@
                 const times = SunCalc.getTimes(dateClone, LAT, LON);
                 const dur = (times.sunset - times.sunrise) / 3600000;
                 
-                let lineStart = null;
-                let lineEnd = null;
-
-                // ตรวจสอบวันที่ 14 มี.ค. และ 29 ก.ย. เพื่อลากเส้นประจากบนลงล่าง (0-24)
+                let lineStart = null; let lineEnd = null;
                 if (dateClone.getMonth() === 2 && dateClone.getDate() === 14) lineStart = 24;
                 if (dateClone.getMonth() === 8 && dateClone.getDate() === 29) lineEnd = 24;
 
                 data.addRow([
-                    dateClone, 
-                    dur, 
+                    dateClone, dur, 
                     `${dateClone.toLocaleDateString('th-TH', {day:'numeric', month:'short'})}: ${dur.toFixed(2)} ชม.`,
-                    lineStart,
-                    lineEnd
+                    lineStart, lineEnd
                 ]);
 
                 if(dateClone.getMonth() === 2 && dateClone.getDate() === 15) {
@@ -182,25 +177,21 @@
                 backgroundColor: 'transparent',
                 series: {
                     0: { type: 'area', color: '#ff9f43', areaOpacity: 0.15, lineWidth: 3 },
-                    1: { type: 'bars', color: '#ffffff', barWidth: 1, visibleInLegend: false, enableInteractivity: false, opacity: 0.3 }, // เส้นประเริ่มต้น
-                    2: { type: 'bars', color: '#ffffff', barWidth: 1, visibleInLegend: false, enableInteractivity: false, opacity: 0.3 }  // เส้นประจุดจบ
+                    1: { type: 'bars', color: '#ffffff', barWidth: 1, visibleInLegend: false, enableInteractivity: false, opacity: 0.3 },
+                    2: { type: 'bars', color: '#ffffff', barWidth: 1, visibleInLegend: false, enableInteractivity: false, opacity: 0.3 }
                 },
                 legend: 'none',
                 hAxis: { format: 'MMM', textStyle: {color: '#8b949e', fontSize: 10}, gridlines: {color: 'transparent'} },
                 vAxis: { 
-                    textStyle: {color: '#8b949e', fontSize: 10}, 
-                    gridlines: {color: '#30363d'}, 
-                    ticks: [0, 6, 12, 18, 24],
-                    baselineColor: '#30363d',
-                    viewWindow: { min: 0, max: 24 }
+                    textStyle: {color: '#8b949e', fontSize: 10}, gridlines: {color: '#30363d'}, 
+                    ticks: [0, 6, 12, 18, 24], baselineColor: '#30363d', viewWindow: { min: 0, max: 24 }
                 },
                 chartArea: {width: '90%', height: '70%'},
-                // ทำให้บาร์ดูเหมือนเส้นประ
-                isStacked: false,
                 bar: { groupWidth: '1' }
             });
         }
 
+        // --- Standard Fetch Functions (คงเดิม) ---
         function fetchSensorData() {
             const sheetID = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
             const query = new google.visualization.Query(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tq=select A,B,C order by A desc limit 100`);
@@ -220,8 +211,7 @@
                     document.getElementById('last-sync').innerText = `Last Sync: ${data.getFormattedValue(0,0)}`;
                     let t_min = 100, t_max = -100;
                     for(let i=0; i<data.getNumberOfRows(); i++) {
-                        let tv = data.getValue(i,1);
-                        if(tv < t_min) t_min = tv; if(tv > t_max) t_max = tv;
+                        let tv = data.getValue(i,1); if(tv < t_min) t_min = tv; if(tv > t_max) t_max = tv;
                     }
                     document.getElementById('t_minmax').innerText = `Min: ${t_min.toFixed(1)} | Max: ${t_max.toFixed(1)}`;
                 }
