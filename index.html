@@ -64,7 +64,7 @@
                     <div class="label-text"><span>Temperature</span><span>°C</span></div>
                     <div class="gauge-wrapper">
                         <div class="gauge-bg temp-gradient"></div>
-                        <div id="tempNeedle" class="needle" style="transform: translateX(-50%) rotate(${(t * 3) - 90}deg);"></div>
+                        <div id="tempNeedle" class="needle" style="transform: translateX(-50%) rotate(-90deg);"></div>
                     </div>
                     <div class="value-display" id="t_val">--</div>
                     <div class="text-secondary small mt-1" id="t_minmax">Min: -- | Max: --</div>
@@ -75,7 +75,7 @@
                     <div class="label-text"><span>Humidity</span><span>%</span></div>
                     <div class="gauge-wrapper">
                         <div class="gauge-bg hum-gradient"></div>
-                        <div id="humNeedle" class="needle" style="transform: translateX(-50%) rotate(${(h * 1.8) - 90}deg);"></div>
+                        <div id="humNeedle" class="needle" style="transform: translateX(-50%) rotate(-90deg);"></div>
                     </div>
                     <div class="value-display" id="h_val">--</div>
                     <div class="text-secondary small mt-1" id="h_minmax">Min: -- | Max: --</div>
@@ -191,7 +191,6 @@
             });
         }
 
-        // --- Standard Fetch Functions (คงเดิม) ---
         function fetchSensorData() {
             const sheetID = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
             const query = new google.visualization.Query(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tq=select A,B,C order by A desc limit 100`);
@@ -218,8 +217,8 @@
                 new google.visualization.LineChart(document.getElementById('line_chart')).draw(data, {
                     legend: 'bottom', colors: ['#ff9f43', '#00d2ff'], backgroundColor: 'transparent',
                     chartArea: {width: '90%', height: '70%'},
-                    hAxis: {textStyle: {color: '#8b949e', fontSize: 10}, gridlines: {color: '#30363d'}},
-                    vAxis: {textStyle: {color: '#8b949e'}, gridlines: {color: '#30363d'}}
+                    hAxis: { textStyle: {color: '#8b949e', fontSize: 10}, gridlines: {color: '#30363d'} },
+                    vAxis: { textStyle: {color: '#8b949e'}, gridlines: {color: '#30363d'} }
                 });
             });
         }
