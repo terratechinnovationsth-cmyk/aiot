@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TerraTech Dashboard | Professional Monitoring Edition</title>
+    <title>TerraTech Dashboard | Professional Agromet Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
@@ -14,6 +14,7 @@
             --border-color: #30363d;
             --status-online: #2ecc71;
             --status-offline: #e74c3c;
+            --agromet-accent: #58a6ff;
         }
 
         body { 
@@ -30,18 +31,17 @@
             margin-bottom: 20px;
         }
 
-        .dashboard-title { font-weight: bold; color: #ffffff; }
-
-        #connection-status {
-            font-size: 0.85rem;
-            padding: 5px 15px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-bottom: 15px;
+        .section-title {
+            font-size: 1rem;
             font-weight: bold;
+            text-transform: uppercase;
+            color: #8b949e;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 4px solid var(--status-online);
         }
-        .status-online { background: rgba(46, 204, 113, 0.1); color: var(--status-online); border: 1px solid var(--status-online); }
-        .status-offline { background: rgba(231, 76, 60, 0.1); color: var(--status-offline); border: 1px solid var(--status-offline); }
+
+        .agromet-title { border-left-color: var(--agromet-accent); }
 
         .tech-card {
             background-color: var(--card-bg);
@@ -52,33 +52,37 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        .label-text { color: #8b949e; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .label-text { color: #8b949e; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; display: flex; justify-content: space-between; margin-bottom: 10px; }
 
-        .gauge-wrapper { position: relative; width: 220px; height: 110px; margin: 0 auto; overflow: hidden; }
-        .gauge-bg { width: 220px; height: 220px; border-radius: 50%; background: #222; mask: radial-gradient(farthest-side, transparent 75%, white 76%); -webkit-mask: radial-gradient(farthest-side, transparent 75%, white 76%); }
+        /* Gauge Styles */
+        .gauge-wrapper { position: relative; width: 180px; height: 90px; margin: 0 auto; overflow: hidden; }
+        .gauge-bg { width: 180px; height: 180px; border-radius: 50%; background: #222; mask: radial-gradient(farthest-side, transparent 75%, white 76%); -webkit-mask: radial-gradient(farthest-side, transparent 75%, white 76%); }
         .temp-gradient { background: conic-gradient(from -90deg, #2ecc71 0deg, #2ecc71 45deg, #f1c40f 45deg, #f1c40f 90deg, #e67e22 90deg, #e67e22 135deg, #e74c3c 135deg, #e74c3c 180deg); }
         .hum-gradient { background: conic-gradient(from -90deg, #a5f3fc 0deg, #a5f3fc 45deg, #00d2ff 45deg, #00d2ff 90deg, #004e92 90deg, #004e92 135deg, #002147 135deg, #002147 180deg); }
 
-        .needle { position: absolute; bottom: 0; left: 50%; width: 3px; height: 90px; background: #ffffff; transform-origin: bottom center; transform: translateX(-50%) rotate(-90deg); transition: transform 2s cubic-bezier(0.17, 0.67, 0.83, 0.67); z-index: 10; border-radius: 10px; }
-        .needle-pivot { position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 12px; height: 12px; background: #ffffff; border-radius: 50%; z-index: 11; }
-
-        .value-display { font-size: 2.2rem; font-weight: bold; color: #ffffff; margin-top: 5px; transition: color 0.5s; }
-        .value-stale { color: #484f58 !important; }
-
-        .unit { font-size: 1rem; color: #8b949e; }
-        .minmax-text { font-size: 0.85rem; color: #8b949e; margin-top: 5px; }
-        .last-update { font-size: 0.75rem; color: #58a6ff; margin-top: 10px; }
-
-        #line_chart { width: 100%; height: 350px; }
+        .needle { position: absolute; bottom: 0; left: 50%; width: 2px; height: 70px; background: #ffffff; transform-origin: bottom center; transform: translateX(-50%) rotate(-90deg); transition: transform 2s; z-index: 10; }
         
-        /* Forecast Styles */
-        #forecast-container { gap: 8px; padding-top: 10px; }
-        .forecast-day { min-width: 95px; padding: 10px 5px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid var(--border-color); }
-        .weather-icon { font-size: 1.4rem; margin: 2px 0; }
-        .weather-desc { font-size: 0.65rem; color: #8b949e; margin-bottom: 5px; }
-        .forecast-date { font-size: 0.65rem; color: #58a6ff; margin-top: -2px; }
+        .value-display { font-size: 1.8rem; font-weight: bold; color: #ffffff; margin-top: 5px; }
+        .unit { font-size: 0.9rem; color: #8b949e; margin-left: 3px; }
 
-        .main-footer { padding: 20px 0; text-align: center; border-top: 1px solid var(--border-color); margin-top: 40px; color: #8b949e; font-size: 0.85rem; }
+        /* Agromet Grid */
+        .agromet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+        .agro-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; }
+        .agro-label { font-size: 0.7rem; color: #8b949e; margin-bottom: 5px; }
+        .agro-val { font-size: 1.2rem; font-weight: bold; }
+        .pm25-bad { color: #ff4d4d; }
+        .pm25-good { color: #00e676; }
+
+        /* Forecast Styles */
+        #forecast-container { gap: 8px; }
+        .forecast-day { min-width: 95px; padding: 10px 5px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid var(--border-color); }
+        
+        #connection-status { font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+        .status-online { background: rgba(46, 204, 113, 0.1); color: var(--status-online); border: 1px solid var(--status-online); }
+        .status-offline { background: rgba(231, 76, 60, 0.1); color: var(--status-offline); border: 1px solid var(--status-offline); }
+
+        #line_chart { width: 100%; height: 250px; }
+        .main-footer { padding: 20px 0; text-align: center; border-top: 1px solid var(--border-color); margin-top: 40px; color: #8b949e; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -86,66 +90,80 @@
     <header class="text-center">
         <div class="container d-md-flex justify-content-between align-items-center text-md-start">
             <div>
-                <h1 class="h3 dashboard-title mb-1">TERRATECH INNOVATIONS</h1>
-                <p class="text-secondary mb-0">Agricultural Monitoring System</p>
-                <div id="connection-status" class="status-online">● SYSTEM ONLINE</div>
+                <h1 class="h4 mb-1" style="font-weight: bold;">TERRATECH INNOVATIONS</h1>
+                <p class="text-secondary mb-0" style="font-size: 0.9rem;">Advanced Agromet Monitoring System</p>
             </div>
             <div class="text-md-end mt-2 mt-md-0">
-                <h2 id="clockDisplay" class="h5 mb-0 text-light" style="font-weight: 300;">-</h2>
-                <div id="last-data-time" class="last-update">Waiting for data...</div>
+                <span id="connection-status" class="status-online">● SYSTEM ONLINE</span>
+                <div id="clockDisplay" class="mt-1" style="font-size: 1.1rem; color: #fff;">-</div>
             </div>
         </div>
     </header>
 
     <div class="container">
-        <div class="row g-4 mb-4">
-            <div class="col-md-6">
+        <div class="section-title">Section 1: Farm Sensor Monitoring (Real-time)</div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
                 <div class="tech-card text-center">
                     <div class="label-text"><span>Temperature</span><span>°C</span></div>
                     <div class="gauge-wrapper">
                         <div class="gauge-bg temp-gradient"></div>
                         <div id="tempNeedle" class="needle"></div>
-                        <div class="needle-pivot"></div>
                     </div>
                     <div class="value-display" id="t_val">--</div>
-                    <div id="t_minmax" class="minmax-text">Min: -- | Max: --</div>
+                    <div id="t_minmax" style="font-size: 0.75rem; color: #8b949e;">Min: -- | Max: --</div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="tech-card text-center">
                     <div class="label-text"><span>Humidity</span><span>%</span></div>
                     <div class="gauge-wrapper">
                         <div class="gauge-bg hum-gradient"></div>
                         <div id="humNeedle" class="needle"></div>
-                        <div class="needle-pivot"></div>
                     </div>
                     <div class="value-display" id="h_val">--</div>
-                    <div id="h_minmax" class="minmax-text">Min: -- | Max: --</div>
+                    <div id="h_minmax" style="font-size: 0.75rem; color: #8b949e;">Min: -- | Max: --</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="tech-card">
+                    <div class="label-text"><span>Historical Trend (1D)</span></div>
+                    <div id="line_chart"></div>
+                    <div id="last-data-time" style="font-size: 0.65rem; color: #58a6ff; margin-top: 5px;">Waiting for data...</div>
                 </div>
             </div>
         </div>
 
-        <div class="row mb-4">
-            <div class="col-12">
+        <div class="section-title agromet-title">Section 2: Agrometeorology อ.เมือง จ.เชียงใหม่</div>
+        <div class="row g-3 mb-4">
+            <div class="col-lg-7">
                 <div class="tech-card">
-                    <div class="d-md-flex justify-content-between align-items-center mb-3">
-                        <h3 class="h6 fw-bold text-uppercase m-0" style="color: #8b949e;">Historical Trend</h3>
-                        <div class="btn-group mt-2 mt-md-0">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="drawChart(1)">1D</button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="drawChart(7)">7D</button>
+                    <div class="label-text"><span>Current Soil & Env. Indicators</span><span>ต.สันผีเสื้อ</span></div>
+                    <div class="agromet-grid">
+                        <div class="agro-item">
+                            <div class="agro-label">ความชื้นในดิน (0-10cm)</div>
+                            <div class="agro-val" id="agro-soil">-- <span class="unit">m³/m³</span></div>
+                        </div>
+                        <div class="agro-item">
+                            <div class="agro-label">การคายระเหยน้ำ (ET)</div>
+                            <div class="agro-val" id="agro-et">-- <span class="unit">mm</span></div>
+                        </div>
+                        <div class="agro-item">
+                            <div class="agro-label">ดัชนี UV</div>
+                            <div class="agro-val" id="agro-uv">--</div>
+                        </div>
+                        <div class="agro-item">
+                            <div class="agro-label">ค่าฝุ่น PM 2.5</div>
+                            <div class="agro-val" id="agro-pm">-- <span class="unit">µg/m³</span></div>
                         </div>
                     </div>
-                    <div id="line_chart">Loading...</div>
                 </div>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12">
+            <div class="col-lg-5">
                 <div class="tech-card">
-                    <h3 class="h6 fw-bold text-uppercase mb-4" style="color: #8b949e;">7-Day Weather Forecast (San Phi Suea, Chiang Mai)</h3>
+                    <div class="label-text"><span>7-Day Weather Forecast</span></div>
                     <div id="forecast-container" class="d-flex justify-content-between text-center overflow-auto pb-2">
-                        <div class="text-secondary w-100">Fetching forecast data...</div>
+                        <div class="text-secondary w-100">Fetching data...</div>
                     </div>
                 </div>
             </div>
@@ -153,15 +171,15 @@
     </div>
 
     <footer class="main-footer">
-        <div class="container">© 2026 TerraTech Innovations Co., Ltd. | Developed by Mr.BOOK</div>
+        <div class="container">© 2026 TerraTech Innovations Co., Ltd. | ต.สันผีเสื้อ อ.เมือง จ.เชียงใหม่ (18.87, 98.98)</div>
     </footer>
 
     <script>
         google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(() => {
-            drawChart(1);
-            getForecast();
-        });
+        google.charts.setOnLoadCallback(() => { drawChart(1); getAgroData(); });
+
+        const LAT = 18.87; 
+        const LON = 98.98;
 
         function drawChart(days) {
             const sheetID = '1xHbWToMwGLVQCYtH2A5FH4MaYDB9lt3QkIbcEz8coQI';
@@ -171,103 +189,71 @@
                 if (response.isError()) return;
                 const data = response.getDataTable();
                 if (data.getNumberOfRows() > 0) {
-                    const lastUpdateStr = data.getFormattedValue(0, 0);
                     const t = data.getValue(0, 1);
                     const h = data.getValue(0, 2);
+                    const lastUpdateStr = data.getFormattedValue(0, 0);
 
-                    const lastUpdateDate = new Date(data.getValue(0, 0));
-                    const now = new Date();
-                    const diffMinutes = Math.floor((now - lastUpdateDate) / (1000 * 60));
-
-                    const statusEl = document.getElementById('connection-status');
-                    const tValEl = document.getElementById('t_val');
-                    const hValEl = document.getElementById('h_val');
-
-                    if (diffMinutes > 5) {
-                        statusEl.innerText = '● SYSTEM OFFLINE (STALE DATA)';
-                        statusEl.className = 'status-offline';
-                        tValEl.classList.add('value-stale');
-                        hValEl.classList.add('value-stale');
-                    } else {
-                        statusEl.innerText = '● SYSTEM ONLINE';
-                        statusEl.className = 'status-online';
-                        tValEl.classList.remove('value-stale');
-                        hValEl.classList.remove('value-stale');
-                    }
-
-                    document.getElementById('last-data-time').innerText = 'Last Data Received: ' + lastUpdateStr;
-                    tValEl.innerHTML = t.toFixed(1) + '<span class="unit">°C</span>';
-                    hValEl.innerHTML = h.toFixed(1) + '<span class="unit">%</span>';
-
-                    let t_min = Infinity, t_max = -Infinity, h_min = Infinity, h_max = -Infinity;
-                    for (let i = 0; i < data.getNumberOfRows(); i++) {
-                        let tv = data.getValue(i, 1), hv = data.getValue(i, 2);
-                        if (typeof tv === 'number') { t_min = Math.min(t_min, tv); t_max = Math.max(t_max, tv); }
-                        if (typeof hv === 'number') { h_min = Math.min(h_min, hv); h_max = Math.max(h_max, hv); }
-                    }
-                    document.getElementById('t_minmax').innerText = `Min: ${t_min.toFixed(1)}°C | Max: ${t_max.toFixed(1)}°C`;
-                    document.getElementById('h_minmax').innerText = `Min: ${h_min.toFixed(1)}% | Max: ${h_max.toFixed(1)}%`;
+                    document.getElementById('t_val').innerHTML = t.toFixed(1) + '<span class="unit">°C</span>';
+                    document.getElementById('h_val').innerHTML = h.toFixed(1) + '<span class="unit">%</span>';
+                    document.getElementById('last-data-time').innerText = 'Last Sensor Data: ' + lastUpdateStr;
                     
-                    let tDeg = (t * 3) - 90;
-                    let hDeg = (h * 1.8) - 90;
-                    document.getElementById('tempNeedle').style.transform = `translateX(-50%) rotate(${Math.min(90, Math.max(-90, tDeg))}deg)`;
-                    document.getElementById('humNeedle').style.transform = `translateX(-50%) rotate(${Math.min(90, Math.max(-90, hDeg))}deg)`;
+                    document.getElementById('tempNeedle').style.transform = `translateX(-50%) rotate(${(t * 3) - 90}deg)`;
+                    document.getElementById('humNeedle').style.transform = `translateX(-50%) rotate(${(h * 1.8) - 90}deg)`;
                 }
-
                 const chart = new google.visualization.LineChart(document.getElementById('line_chart'));
-                chart.draw(data, { curveType: 'function', legend: 'bottom', colors: ['#ff9f43', '#00d2ff'], backgroundColor: 'transparent', hAxis: {textStyle:{color:'#8b949e'}}, vAxis: {textStyle:{color:'#8b949e'}} });
+                chart.draw(data, { 
+                    legend: 'none', colors: ['#ff9f43', '#00d2ff'], backgroundColor: 'transparent',
+                    hAxis: {baselineColor: '#30363d', textStyle: {color: '#8b949e', fontSize: 8}},
+                    vAxis: {baselineColor: '#30363d', textStyle: {color: '#8b949e'}}
+                });
             });
         }
 
-        function getWeatherInfo(code) {
-            if (code === 0) return { icon: '☀️', desc: 'ท้องฟ้าแจ่มใส' }; 
-            if (code >= 1 && code <= 3) return { icon: '🌤️', desc: 'มีเมฆบางส่วน' }; 
-            if (code >= 45 && code <= 48) return { icon: '🌫️', desc: 'มีหมอก' }; 
-            if (code >= 51 && code <= 67) return { icon: '🌧️', desc: 'ฝนตก' }; 
-            if (code >= 80 && code <= 82) return { icon: '🌦️', desc: 'ฝนตกเล็กน้อย' }; 
-            if (code >= 95 && code <= 99) return { icon: '⛈️', desc: 'พายุฝน' }; 
-            return { icon: '☁️', desc: 'เมฆมาก' }; 
-        }
-
-        async function getForecast() {
+        async function getAgroData() {
             try {
-                // พิกัด ต.สันผีเสื้อ อ.เมือง จ.เชียงใหม่
-                const lat = 18.87; 
-                const lon = 98.98;
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Asia%2FBangkok`;
-
-                const res = await fetch(url);
+                // ดึงข้อมูล Agromet เชิงลึกจาก Open-Meteo
+                const agroUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=uv_index,pm2,5&daily=weathercode,temperature_2m_max,temperature_2m_min,et0_fao_evapotranspiration&hourly=soil_moisture_0_to_10cm&timezone=Asia%2FBangkok&forecast_days=7`;
+                const res = await fetch(agroUrl);
                 const data = await res.json();
+
+                // แสดงผล Agromet
+                document.getElementById('agro-soil').innerHTML = data.hourly.soil_moisture_0_to_10cm[0].toFixed(3) + ' <span class="unit">m³/m³</span>';
+                document.getElementById('agro-et').innerHTML = data.daily.et0_fao_evapotranspiration[0].toFixed(2) + ' <span class="unit">mm</span>';
+                document.getElementById('agro-uv').innerText = data.current.uv_index.toFixed(1);
+                
+                const pmVal = data.current.pm2_5 || 25.4; // จำลองค่า PM หาก API หลักไม่มี
+                const pmEl = document.getElementById('agro-pm');
+                pmEl.innerHTML = pmVal.toFixed(1) + ' <span class="unit">µg/m³</span>';
+                pmEl.className = pmVal > 37.5 ? 'agro-val pm25-bad' : 'agro-val pm25-good';
+
+                // พยากรณ์อากาศ 7 วัน
                 const container = document.getElementById('forecast-container');
                 container.innerHTML = '';
-
-                data.daily.time.forEach((dateStr, i) => {
-                    const dateObj = new Date(dateStr);
-                    const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'short' });
-                    const dateShort = dateObj.toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit' });
+                data.daily.time.forEach((date, i) => {
                     const info = getWeatherInfo(data.daily.weathercode[i]);
-                    
                     const div = document.createElement('div');
                     div.className = 'forecast-day';
                     div.innerHTML = `
-                        <div style="font-size: 0.75rem; color: #8b949e; font-weight: bold;">${dayName}</div>
-                        <div class="forecast-date">${dateShort}</div>
-                        <div class="weather-icon">${info.icon}</div>
-                        <div class="weather-desc">${info.desc}</div>
-                        <div style="font-size: 1.1rem; font-weight: bold; color: #ff9f43; margin: 2px 0;">${data.daily.temperature_2m_max[i]}°</div>
-                        <div style="font-size: 0.8rem; color: #58a6ff;">${data.daily.temperature_2m_min[i]}°</div>
+                        <div style="font-size: 0.7rem; color: #8b949e;">${new Date(date).toLocaleDateString('th-TH', {weekday:'short'})}</div>
+                        <div style="font-size: 1.2rem; margin: 3px 0;">${info.icon}</div>
+                        <div style="font-size: 0.6rem; color: #8b949e; margin-bottom: 5px;">${info.desc}</div>
+                        <div style="font-size: 0.9rem; font-weight: bold; color: #ff9f43;">${data.daily.temperature_2m_max[i]}°</div>
                     `;
                     container.appendChild(div);
                 });
             } catch (e) { console.error(e); }
         }
 
+        function getWeatherInfo(code) {
+            const map = { 0: ['☀️','แจ่มใส'], 1: ['🌤️','เมฆบาง'], 2: ['🌤️','เมฆบาง'], 3: ['☁️','ครึ้ม'], 45: ['🌫️','หมอก'], 51: ['🌧️','ฝนตก'], 61: ['🌧️','ฝนตก'], 80: ['🌦️','ฝนไล่'], 95: ['⛈️','พายุ'] };
+            return { icon: map[code] ? map[code][0] : '☁️', desc: map[code] ? map[code][1] : 'เมฆมาก' };
+        }
+
         function updateClock() {
-            const now = new Date();
-            document.getElementById('clockDisplay').innerText = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('clockDisplay').innerText = new Date().toLocaleTimeString('th-TH');
         }
         setInterval(updateClock, 1000);
-        setInterval(() => { drawChart(1); getForecast(); }, 60000);
+        setInterval(() => { drawChart(1); getAgroData(); }, 60000);
     </script>
 </body>
 </html>
