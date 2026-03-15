@@ -146,7 +146,8 @@
             data.addColumn('date', 'Date');
             data.addColumn('number', 'Daylight Hours');
             data.addColumn({type: 'string', role: 'tooltip'});
-            data.addColumn('number', 'Markers');
+            data.addColumn('number', 'Vertical Line Start'); // เส้นประเริ่มต้น
+            data.addColumn('number', 'Vertical Line End');   // เส้นประจุดจบ
 
             const year = 2026;
             for (let d = new Date(year, 0, 1); d <= new Date(year, 11, 31); d.setDate(d.getDate() + 1)) {
@@ -154,16 +155,19 @@
                 const times = SunCalc.getTimes(dateClone, LAT, LON);
                 const dur = (times.sunset - times.sunrise) / 3600000;
                 
-                let markerVal = null;
-                // เส้นประระบุจุด 14 Mar และ 29 Sep
-                if (dateClone.getMonth() === 2 && dateClone.getDate() === 14) markerVal = 24;
-                if (dateClone.getMonth() === 8 && dateClone.getDate() === 29) markerVal = 24;
+                let lineStart = null;
+                let lineEnd = null;
+
+                // ตรวจสอบวันที่ 14 มี.ค. และ 29 ก.ย. เพื่อลากเส้นประจากบนลงล่าง (0-24)
+                if (dateClone.getMonth() === 2 && dateClone.getDate() === 14) lineStart = 24;
+                if (dateClone.getMonth() === 8 && dateClone.getDate() === 29) lineEnd = 24;
 
                 data.addRow([
                     dateClone, 
                     dur, 
                     `${dateClone.toLocaleDateString('th-TH', {day:'numeric', month:'short'})}: ${dur.toFixed(2)} ชม.`,
-                    markerVal
+                    lineStart,
+                    lineEnd
                 ]);
 
                 if(dateClone.getMonth() === 2 && dateClone.getDate() === 15) {
@@ -177,8 +181,9 @@
             chart.draw(data, {
                 backgroundColor: 'transparent',
                 series: {
-                    0: { type: 'area', color: '#ff9f43', areaOpacity: 0.15, lineWidth: 3 }, // เส้นกราฟสีส้ม
-                    1: { type: 'line', color: '#ffffff', lineWidth: 1, lineDashStyle: [4, 4], visibleInLegend: false, enableInteractivity: false }
+                    0: { type: 'area', color: '#ff9f43', areaOpacity: 0.15, lineWidth: 3 },
+                    1: { type: 'bars', color: '#ffffff', barWidth: 1, visibleInLegend: false, enableInteractivity: false, opacity: 0.3 }, // เส้นประเริ่มต้น
+                    2: { type: 'bars', color: '#ffffff', barWidth: 1, visibleInLegend: false, enableInteractivity: false, opacity: 0.3 }  // เส้นประจุดจบ
                 },
                 legend: 'none',
                 hAxis: { format: 'MMM', textStyle: {color: '#8b949e', fontSize: 10}, gridlines: {color: 'transparent'} },
@@ -186,9 +191,13 @@
                     textStyle: {color: '#8b949e', fontSize: 10}, 
                     gridlines: {color: '#30363d'}, 
                     ticks: [0, 6, 12, 18, 24],
-                    baselineColor: '#30363d'
+                    baselineColor: '#30363d',
+                    viewWindow: { min: 0, max: 24 }
                 },
-                chartArea: {width: '90%', height: '70%'}
+                chartArea: {width: '90%', height: '70%'},
+                // ทำให้บาร์ดูเหมือนเส้นประ
+                isStacked: false,
+                bar: { groupWidth: '1' }
             });
         }
 
