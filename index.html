@@ -219,7 +219,8 @@
                     document.getElementById('h_minmax').innerText = `Min: ${h_min.toFixed(1)} | Max: ${h_max.toFixed(1)}`;
                 }
                 new google.visualization.LineChart(document.getElementById('line_chart')).draw(data, {
-                    legend: 'bottom', colors: ['#ff9f43', '#00d2ff'], backgroundColor: 'transparent',
+                    legend: { position: 'bottom', textStyle: { color: '#e4e6eb' } }, // ปรับสีคำอธิบาย Temperature/Humidity
+                    colors: ['#ff9f43', '#00d2ff'], backgroundColor: 'transparent',
                     chartArea: {width: '90%', height: '70%'},
                     hAxis: { textStyle: {color: '#8b949e', fontSize: 10}, gridlines: {color: '#30363d'} },
                     vAxis: { textStyle: {color: '#8b949e'}, gridlines: {color: '#30363d'} }
