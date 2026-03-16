@@ -122,7 +122,10 @@
                             <div class="small text-secondary">12 hours sunlight</div>
                             <div class="fw-bold text-success" style="font-size: 0.9rem;">14 Mar — 29 Sep 2026</div>
                         </div>
-                        <div class="col-md-3"><div class="small text-secondary">วันนี้ (15 มี.ค.)</div><div id="today-daylight" class="fw-bold">--</div></div>
+                        <div class="col-md-3">
+                            <div class="small text-secondary" id="today-label">วันนี้</div>
+                            <div id="today-daylight" class="fw-bold">--</div>
+                        </div>
                         <div class="col-md-3"><div class="small text-secondary">Sunrise</div><div id="today-sunrise" class="fw-bold text-warning">--</div></div>
                         <div class="col-md-3"><div class="small text-secondary">Sunset</div><div id="today-sunset" class="fw-bold text-info">--</div></div>
                     </div>
@@ -150,6 +153,10 @@
             data.addColumn('number', 'Vertical Line End');
 
             const year = 2026;
+            const now = new Date();
+            // อัปเดต Label วันที่ปัจจุบัน (เช่น วันนี้ 16 มี.ค.)
+            document.getElementById('today-label').innerText = `วันนี้ (${now.toLocaleDateString('th-TH', {day:'numeric', month:'short'})})`;
+
             for (let d = new Date(year, 0, 1); d <= new Date(year, 11, 31); d.setDate(d.getDate() + 1)) {
                 const dateClone = new Date(d);
                 const times = SunCalc.getTimes(dateClone, LAT, LON);
@@ -165,7 +172,8 @@
                     lineStart, lineEnd
                 ]);
 
-                if(dateClone.getMonth() === 2 && dateClone.getDate() === 15) {
+                // ตรวจสอบว่าเป็น "วันนี้" หรือไม่ เพื่ออัปเดตข้อมูลรายละเอียด
+                if(dateClone.toDateString() === now.toDateString()) {
                     document.getElementById('today-daylight').innerText = dur.toFixed(2) + " ชม.";
                     document.getElementById('today-sunrise').innerText = times.sunrise.getHours() + ":" + times.sunrise.getMinutes().toString().padStart(2,'0');
                     document.getElementById('today-sunset').innerText = times.sunset.getHours() + ":" + times.sunset.getMinutes().toString().padStart(2,'0');
@@ -219,7 +227,7 @@
                     document.getElementById('h_minmax').innerText = `Min: ${h_min.toFixed(1)} | Max: ${h_max.toFixed(1)}`;
                 }
                 new google.visualization.LineChart(document.getElementById('line_chart')).draw(data, {
-                    legend: { position: 'bottom', textStyle: { color: '#e4e6eb' } }, // ปรับสีคำอธิบาย Temperature/Humidity
+                    legend: { position: 'bottom', textStyle: { color: '#e4e6eb' } },
                     colors: ['#ff9f43', '#00d2ff'], backgroundColor: 'transparent',
                     chartArea: {width: '90%', height: '70%'},
                     hAxis: { textStyle: {color: '#8b949e', fontSize: 10}, gridlines: {color: '#30363d'} },
@@ -269,7 +277,9 @@
         }
 
         setInterval(() => { document.getElementById('clockDisplay').innerText = new Date().toLocaleTimeString('th-TH'); }, 1000);
-        setInterval(() => { fetchSensorData(); fetchRoute1_WeatherAgro(); fetchRoute2_SoilDetails(); fetchRoute3_AirQuality(); }, 60000);
+        setInterval(() => { 
+            fetchSensorData(); fetchRoute1_WeatherAgro(); fetchRoute2_SoilDetails(); fetchRoute3_AirQuality(); drawSunGraph();
+        }, 60000);
     </script>
 </body>
 </html>
