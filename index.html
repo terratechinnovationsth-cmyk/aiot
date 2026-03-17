@@ -35,7 +35,11 @@
         .forecast-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
         .forecast-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px 5px; text-align: center; }
         .weather-icon { font-size: 2.5rem; margin: 10px 0; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
-        #line_chart, #sun_chart { width: 100%; height: 350px; }
+        #line_chart, #sun_chart { width: 100%; height: 450px; } /* ปรับความสูงกราฟพระอาทิตย์ */
+        .sun-card-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+        .sun-data-card { flex: 1; min-width: 130px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; text-align: center; }
+        .sun-data-label { font-size: 0.65rem; color: #8b949e; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
+        .sun-data-val { font-size: 0.95rem; font-weight: 700; color: #ffffff; }
         .main-footer { padding: 30px 0; text-align: center; color: #8b949e; border-top: 1px solid var(--border-color); margin-top: 40px; font-size: 0.8rem; }
     </style>
 </head>
@@ -110,24 +114,37 @@
         </div>
 
         <div class="section-header" style="border-left-color: #f1c40f;">
-            <h2 class="section-title">Section 4: Photoperiodic Graphs 2026: Chiangmai</h2>
+            <h2 class="section-title">Photoperiodic Graphs 2026: Chiangmai</h2>
         </div>
         <div class="row mb-4">
             <div class="col-12">
                 <div class="tech-card">
-                    <div class="label-text"><span>Day/Night Cycle Analysis</span></div>
                     <div id="sun_chart"></div>
-                    <div class="row text-center mt-4">
-                        <div class="col-md-3">
-                            <div class="small text-secondary">12 hours sunlight</div>
-                            <div class="fw-bold text-success" style="font-size: 0.9rem;">14 Mar — 29 Sep 2026</div>
+                    <div class="sun-card-container">
+                        <div class="sun-data-card">
+                            <div class="sun-data-label">12 Hours Sunlight Period</div>
+                            <div class="sun-data-val text-success" style="font-size: 0.8rem;">14 Mar — 29 Sep 2026</div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="small text-secondary" id="today-label">วันนี้</div>
-                            <div id="today-daylight" class="fw-bold">--</div>
+                        <div class="sun-data-card" style="border-color: var(--accent-blue);">
+                            <div class="sun-data-label">Today</div>
+                            <div class="sun-data-val" id="today-date-val" style="color: var(--accent-blue);">--</div>
                         </div>
-                        <div class="col-md-3"><div class="small text-secondary">Sunrise</div><div id="today-sunrise" class="fw-bold text-warning">--</div></div>
-                        <div class="col-md-3"><div class="small text-secondary">Sunset</div><div id="today-sunset" class="fw-bold text-info">--</div></div>
+                        <div class="sun-data-card">
+                            <div class="sun-data-label">Sunrise</div>
+                            <div id="today-sunrise" class="sun-data-val" style="color: #f1c40f;">--</div>
+                        </div>
+                        <div class="sun-data-card">
+                            <div class="sun-data-label">Daylight</div>
+                            <div id="today-daylight" class="sun-data-val" style="color: var(--accent-orange);">--</div>
+                        </div>
+                        <div class="sun-data-card">
+                            <div class="sun-data-label">Sunset</div>
+                            <div id="today-sunset" class="sun-data-val" style="color: var(--accent-blue);">--</div>
+                        </div>
+                        <div class="sun-data-card">
+                            <div class="sun-data-label">Night</div>
+                            <div id="today-night" class="sun-data-val">--</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -147,34 +164,39 @@
         function drawSunGraph() {
             const data = new google.visualization.DataTable();
             data.addColumn('date', 'Date');
-            data.addColumn('number', 'Daylight Hours');
-            data.addColumn({type: 'string', role: 'tooltip'});
-            data.addColumn('number', 'Vertical Line Start');
-            data.addColumn('number', 'Vertical Line End');
+            data.addColumn('number', 'Pre-Dawn');
+            data.addColumn('number', 'Daylight');
+            data.addColumn('number', 'Post-Sunset');
+            data.addColumn('number', 'Markers');
+            data.addColumn({type: 'string', role: 'annotation'});
 
             const year = 2026;
             const now = new Date();
-            // อัปเดต Label วันที่ปัจจุบัน (เช่น วันนี้ 16 มี.ค.)
-            document.getElementById('today-label').innerText = `วันนี้ (${now.toLocaleDateString('th-TH', {day:'numeric', month:'short'})})`;
+            document.getElementById('today-date-val').innerText = now.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
 
             for (let d = new Date(year, 0, 1); d <= new Date(year, 11, 31); d.setDate(d.getDate() + 1)) {
                 const dateClone = new Date(d);
                 const times = SunCalc.getTimes(dateClone, LAT, LON);
-                const dur = (times.sunset - times.sunrise) / 3600000;
-                
-                let lineStart = null; let lineEnd = null;
-                if (dateClone.getMonth() === 2 && dateClone.getDate() === 14) lineStart = 24;
-                if (dateClone.getMonth() === 8 && dateClone.getDate() === 29) lineEnd = 24;
+                const sunrise = times.sunrise.getHours() + times.sunrise.getMinutes()/60;
+                const sunset = times.sunset.getHours() + times.sunset.getMinutes()/60;
 
-                data.addRow([
-                    dateClone, dur, 
-                    `${dateClone.toLocaleDateString('th-TH', {day:'numeric', month:'short'})}: ${dur.toFixed(2)} ชม.`,
-                    lineStart, lineEnd
-                ]);
+                let marker = null;
+                let annotation = null;
 
-                // ตรวจสอบว่าเป็น "วันนี้" หรือไม่ เพื่ออัปเดตข้อมูลรายละเอียด
+                if ((dateClone.getMonth() === 2 && dateClone.getDate() === 14) || 
+                    (dateClone.getMonth() === 8 && dateClone.getDate() === 29)) {
+                    marker = 24; 
+                }
+                if (dateClone.getMonth() === 5 && dateClone.getDate() === 20) {
+                    annotation = "12 HOURS SUNLIGHT";
+                }
+
+                data.addRow([dateClone, sunrise, sunset - sunrise, 24 - sunset, marker, annotation]);
+
                 if(dateClone.toDateString() === now.toDateString()) {
-                    document.getElementById('today-daylight').innerText = dur.toFixed(2) + " ชม.";
+                    const dayHrs = sunset - sunrise;
+                    document.getElementById('today-daylight').innerText = dayHrs.toFixed(2) + " hrs";
+                    document.getElementById('today-night').innerText = (24 - dayHrs).toFixed(2) + " hrs";
                     document.getElementById('today-sunrise').innerText = times.sunrise.getHours() + ":" + times.sunrise.getMinutes().toString().padStart(2,'0');
                     document.getElementById('today-sunset').innerText = times.sunset.getHours() + ":" + times.sunset.getMinutes().toString().padStart(2,'0');
                 }
@@ -182,20 +204,23 @@
 
             const chart = new google.visualization.ComboChart(document.getElementById('sun_chart'));
             chart.draw(data, {
+                isStacked: true,
+                curveType: 'function',
                 backgroundColor: 'transparent',
                 series: {
-                    0: { type: 'area', color: '#ff9f43', areaOpacity: 0.15, lineWidth: 3 },
-                    1: { type: 'bars', color: '#ffffff', barWidth: 1, visibleInLegend: false, enableInteractivity: false, opacity: 0.3 },
-                    2: { type: 'bars', color: '#ffffff', barWidth: 1, visibleInLegend: false, enableInteractivity: false, opacity: 0.3 }
+                    0: { type: 'area', color: '#1a3a5a', areaOpacity: 0.5, lineWidth: 3, stroke: '#ff9f43' },
+                    1: { type: 'area', color: '#ff9f43', areaOpacity: 0.4, lineWidth: 3 },
+                    2: { type: 'area', color: '#1a3a5a', areaOpacity: 0.5, lineWidth: 0 },
+                    3: { type: 'bars', color: '#30363d', barWidth: 1, visibleInLegend: false, enableInteractivity: false, opacity: 0.3 }
+                },
+                annotations: {
+                    textStyle: { fontSize: 12, color: '#ffffff', opacity: 0.4, bold: true },
+                    alwaysOutside: false, stem: { color: 'transparent' }
                 },
                 legend: 'none',
                 hAxis: { format: 'MMM', textStyle: {color: '#8b949e', fontSize: 10}, gridlines: {color: 'transparent'} },
-                vAxis: { 
-                    textStyle: {color: '#8b949e', fontSize: 10}, gridlines: {color: '#30363d'}, 
-                    ticks: [0, 6, 12, 18, 24], baselineColor: '#30363d', viewWindow: { min: 0, max: 24 }
-                },
-                chartArea: {width: '90%', height: '70%'},
-                bar: { groupWidth: '1' }
+                vAxis: { ticks: [0, 6, 12, 18, 24], textStyle: {color: '#8b949e', fontSize: 10}, gridlines: {color: '#30363d'}, viewWindow: { min: 0, max: 24 } },
+                chartArea: {width: '90%', height: '80%'}
             });
         }
 
@@ -276,7 +301,7 @@
             } catch (e) { console.error(e); }
         }
 
-        setInterval(() => { document.getElementById('clockDisplay').innerText = new Date().toLocaleTimeString('th-TH'); }, 1000);
+        setInterval(() => { document.getElementById('clockDisplay').innerText = new Date().toLocaleTimeString('en-GB'); }, 1000);
         setInterval(() => { 
             fetchSensorData(); fetchRoute1_WeatherAgro(); fetchRoute2_SoilDetails(); fetchRoute3_AirQuality(); drawSunGraph();
         }, 60000);
